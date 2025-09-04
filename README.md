@@ -1,73 +1,80 @@
-# Welcome to your Lovable project
+# Nelieo — The World's First AI SuperPlatform
 
-## Project info
+Welcome to Nelieo: not just another app — a new class of software. We built a SuperPlatform that fuses search, chat, voice, research, and agentic automation into a single, seamless user experience. This README is your launchpad.
 
-**URL**: https://lovable.dev/projects/2da1e554-f356-482a-9ae6-e343ee9a23c2
+Why "SuperPlatform"?
 
-## How can I edit this code?
+- SuperPlatform = unified intelligence + live web synthesis + agent orchestration.
+- Instant, sourced answers; beautiful structured responses; voice-first interaction; extendable agents that do real work.
+- Designed for professionals, researchers, creators, and teams who demand speed, transparency, and control.
 
-There are several ways of editing your application.
+Core capabilities
 
-**Use Lovable**
+- Real-time web search + AI synthesis: get concise, source-cited answers without tab-hopping.
+- Structured answers: headings, lists, charts, and source panels that are presentation-ready.
+- Voice assistant: speak to Nelieo; Nelieo speaks back with high-quality voices and smooth playback.
+- Agentic workflows: chain tasks, fetch pages, extract data, and produce reports automatically.
+- Rich media: inline images, generated demo videos, and visual previews for sources.
+- History & persistence: conversation and search history stored and retrievable, with server-side instruction persistence.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2da1e554-f356-482a-9ae6-e343ee9a23c2) and start prompting.
+Why it matters
 
-Changes made via Lovable will be committed automatically to this repo.
+- Replace fragmented tools with a single, coherent interface — research faster, verify smarter, ship quicker.
+- Built for humans: readable answers, transparent sources, and graceful failures.
+- Built for teams: share, extend, and automate with safe defaults.
 
-**Use your preferred IDE**
+Quick start (developer)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Clone the repo
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```powershell
 git clone <YOUR_GIT_URL>
+cd lumina-search-flow-main
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies
 
-# Step 3: Install the necessary dependencies.
-npm i
+```powershell
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Run locally (dev server)
+
+```powershell
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Build for production
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```powershell
+npm run build
+```
 
-**Use GitHub Codespaces**
+Deploy
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- The project can be hosted on Firebase Hosting, Vercel, Render, or your preferred provider. The repo includes a `firebase.json` for Firebase deploys.
 
-## What technologies are used for this project?
+Configuration
 
-This project is built with:
+- Copy or edit the `.env` file to add API keys and platform secrets (Gemini, SerpAPI, Firebase, etc.).
+- For CORS and API endpoints, update `cognix-api/server.js` with your `FRONTEND_ORIGIN` when deploying the backend.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Extensibility & contributors
 
-## How can I deploy this project?
+- Add new agent scripts under `agents/`.
+- Contribute UI components in `src/components/` and pages in `src/pages/`.
+- Keep PRs focused: one feature per branch, include a short description and screenshots if UI changes.
 
-Simply open [Lovable](https://lovable.dev/projects/2da1e554-f356-482a-9ae6-e343ee9a23c2) and click on Share -> Publish.
+Security & privacy
 
-## Can I connect a custom domain to my Lovable project?
+- Nelieo surfaces sources and citations so you can verify claims.
+- Do not commit API keys or secrets — use environment variables or secret management in your hosting platform.
 
-Yes, you can!
+Contact & next steps
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Founder: Shourya Sharma — triunex.work@gmail.com (see `src/components/ContactSection.tsx` for contact UI)
+- Want help deploying? Need CORS or production API tweaks? Open an issue or DM the maintainer.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This is the beginning — Nelieo is assembling capabilities that used to require multiple tools into one beautiful, auditable, and extendable SuperPlatform. Join the revolution: build on it, extend it, and make it yours.
+
+-- Shourya ( Fucking genius Developer, Founder & CEO, Nelieo.AI)
