@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  chrome_xpra:
+    build:
+      context: ./chrome-xpra-app
+    container_name: chrome_xpra
+    environment:
+      - PORT=10005
+      - APP_URL=https://www.google.com
+    ports:
+      - "10005:10005"
+    shm_size: "1gb"
+    restart: unless-stopped
+    # Keep the container logs attached to systemd/docker logs; adjust volumes as-needed
+    volumes:
+      - ./chrome-xpra-app:/opt/chrome-xpra:ro

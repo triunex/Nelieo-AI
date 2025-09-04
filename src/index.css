@@ -1,0 +1,941 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark theme (default) */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 262 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 263.4 70% 50.4%;
+
+    --radius: 0.75rem;
+  }
+
+  .light {
+    /* Light theme */
+    /* Softer near-white background for a beautiful light theme */
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 262 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 263.4 70% 50.4%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* Add smooth transitions for theme changes */
+  * {
+    transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out,
+      color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+      Arial, "Noto Sans", "Liberation Sans", "Segoe UI Emoji", sans-serif;
+  }
+
+  /* Apply Inter only to AI answers (keeps the rest of the app on system font) */
+  .ai-answer-font {
+    font-family: "Sora", "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Markdown / AI answer specific improvements */
+  .ai-answer-font .prose,
+  .ai-answer-font .markdown-root {
+    color: hsl(var(--foreground));
+    line-height: 1.7;
+    /* Slightly reduced base font-size for AI answers for denser layout */
+    font-size: 0.94rem;
+  }
+
+  .ai-answer-font p {
+    margin: 0 0 1rem;
+    color: hsl(var(--foreground));
+  }
+
+  .ai-answer-font ul,
+  .ai-answer-font ol {
+    margin: 0 0 1rem 1.25rem;
+    padding: 0;
+  }
+
+  .ai-answer-font li {
+    margin-bottom: 0.45rem;
+  }
+
+  /* Slightly bolder emphasis for important text */
+  .ai-answer-font strong,
+  .ai-answer-font b {
+    font-weight: 600;
+    color: hsl(var(--foreground));
+  }
+
+  /* Modern, polished table presentation for AI answers */
+  .ai-answer-font table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0.75rem 0 1rem 0;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.015),
+      rgba(255, 255, 255, 0.01)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.06);
+  }
+
+  .ai-answer-font thead th {
+    background: rgba(200, 200, 200, 0.06); /* soft grey header */
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    text-transform: none;
+    letter-spacing: 0.01em;
+    padding: 0.9rem 0.9rem;
+    /* Slightly smaller table header text to match reduced body size */
+    font-size: 0.9rem;
+    border-bottom: none;
+  }
+
+  /* Rounded pill corners for header first/last cells */
+  .ai-answer-font thead th:first-child {
+    border-top-left-radius: 0.75rem;
+  }
+  .ai-answer-font thead th:last-child {
+    border-top-right-radius: 0.75rem;
+  }
+
+  .ai-answer-font th,
+  .ai-answer-font td {
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    color: hsl(var(--foreground));
+    /* Match table cell text to slightly smaller body size */
+    font-size: 0.9rem;
+  }
+
+  .ai-answer-font tbody tr {
+    transition: background-color 160ms ease, transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .ai-answer-font tbody tr:nth-child(odd) {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.008),
+      rgba(255, 255, 255, 0.006)
+    );
+  }
+
+  .ai-answer-font tbody tr:hover {
+    background: linear-gradient(
+      90deg,
+      rgba(249, 115, 22, 0.03),
+      rgba(249, 115, 22, 0.02)
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(2, 6, 23, 0.06);
+  }
+
+  .ai-answer-font td code {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 0.12rem 0.35rem;
+    border-radius: 6px;
+    font-size: 0.84rem;
+  }
+
+  /* Small visual separator for the header area under table */
+  .ai-answer-font thead th + th,
+  .ai-answer-font thead th + td {
+    /* nothing - reserved for future micro accents */
+  }
+
+  /* Code blocks and inline code */
+  .ai-answer-font code {
+    background: rgba(0, 0, 0, 0.12);
+    padding: 0.15rem 0.36rem;
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+      "Segoe UI Mono", monospace;
+    /* Slightly reduced inline code size */
+    font-size: 0.86rem;
+  }
+
+  .ai-answer-font pre {
+    background: rgba(0, 0, 0, 0.14);
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    overflow: auto;
+    margin: 0.75rem 0;
+  }
+
+  /* Hide native cursor and show custom one only on fine pointers */
+  /* @media (pointer: fine) {
+    html,
+    body,
+    #root {
+      cursor: none;
+    }
+  } */
+
+  /* Title styling with Sora font */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .title-font {
+    font-family: "Sora", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+      sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    font-weight: 800;
+    letter-spacing: -0.05em;
+  }
+
+  h2 {
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  /* Smaller headings for AI answers to keep density consistent */
+  .ai-answer-font h1 {
+    font-size: 1.25rem; /* slightly smaller than main h1 */
+    line-height: 1.15;
+    margin: 0.6rem 0 0.5rem;
+  }
+
+  .ai-answer-font h2 {
+    font-size: 1.06rem;
+    line-height: 1.18;
+    margin: 0.5rem 0 0.45rem;
+  }
+
+  .ai-answer-font h3 {
+    font-size: 0.98rem;
+    line-height: 1.22;
+    margin: 0.45rem 0 0.35rem;
+  }
+
+  .ai-answer-font h4 {
+    font-size: 0.92rem;
+    line-height: 1.2;
+    margin: 0.35rem 0 0.25rem;
+  }
+
+  /* Light theme specific adjustments */
+  .light .glow-text-purple {
+    color: #8b5cf6;
+    text-shadow: 0 0 12px rgba(139, 92, 246, 0.6),
+      0 0 24px rgba(139, 92, 246, 0.3), 0 0 36px rgba(139, 92, 246, 0.15);
+  }
+
+  .light .glow-text-blue {
+    color: #3b82f6;
+    text-shadow: 0 0 12px rgba(59, 130, 246, 0.6),
+      0 0 24px rgba(59, 130, 246, 0.3), 0 0 36px rgba(59, 130, 246, 0.15);
+  }
+
+  .light .glow-border {
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 3px rgba(139, 92, 246, 0.2),
+      inset 0 0 3px rgba(139, 92, 246, 0.05);
+  }
+
+  .light .glass-card {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgb(229, 231, 235);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .light .search-glow {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25),
+      0 0 30px rgba(59, 130, 246, 0.15);
+  }
+
+  .light .highlight-link {
+    position: relative;
+    color: rgb(55 65 81); /* gray-700 equivalent */
+    font-weight: 500;
+  }
+
+  /* Light theme text colors */
+  .light .text-gray-300 {
+    color: rgb(55 65 81); /* gray-700 equivalent */
+  }
+
+  .light .text-gray-700 {
+    color: rgb(107 114 128); /* gray-500 equivalent */
+  }
+
+  /* Light theme section backgrounds */
+  .light .bg-black\/30 {
+    background-color: rgba(249, 250, 251, 0.8); /* gray-50/80 equivalent */
+  }
+
+  /* Light theme gradient backgrounds */
+  .light .bg-gradient-radial {
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.15) 0%,
+      rgba(59, 130, 246, 0.08) 50%,
+      transparent 70%
+    );
+  }
+
+  .dock-pill {
+    background: white;
+    color: #0f172a; /* slate-900 */
+    border-radius: 9999px;
+    border: 1px solid rgba(15, 23, 42, 0.08); /* subtle border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 10px 30px rgba(0, 0, 0, 0.08);
+    position: relative;
+    isolation: isolate; /* ensure pseudo elements layer correctly */
+  }
+  .dock-pill::after {
+    /* notch removed: hide the pseudo-element */
+    display: none;
+  }
+
+  .dock-pill .lucide {
+    color: #0f172a; /* ensure icons appear dark */
+  }
+
+  /* Custom scrollbar used by chat and side panels - gradient thumb like reference image */
+  .custom-scrollbar,
+  .chat-scroll-smooth {
+    scrollbar-width: thin;
+    scrollbar-color: #8b5cf6 transparent; /* Firefox fallback */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar,
+  .chat-scroll-smooth::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track,
+  .chat-scroll-smooth::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb,
+  .chat-scroll-smooth::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #7dd3fc 0%, #8b5cf6 100%);
+    border-radius: 999px;
+    border: 2px solid rgba(0, 0, 0, 0);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.18) inset;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+  .chat-scroll-smooth::-webkit-scrollbar-thumb:hover {
+    transform: scale(1.02);
+    background: linear-gradient(180deg, #60a5fa 0%, #7c3aed 100%);
+  }
+
+  /* Apply same custom scrollbar to the browser default (page-level) so
+     the native scrollbar matches the chat scrollbar across the app */
+  html,
+  body,
+  #root {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(130, 130, 130) transparent; /* Firefox fallback */
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  #root::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track,
+  #root::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb,
+  #root::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #7dd3fc 0%, #8b5cf6 100%);
+    border-radius: 999px;
+    border: 2px solid rgba(0, 0, 0, 0);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.18) inset;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover,
+  #root::-webkit-scrollbar-thumb:hover {
+    transform: scale(1.02);
+    background: linear-gradient(180deg, #60a5fa 0%, #7c3aed 100%);
+  }
+
+  @media (max-width: 640px) {
+    .dock-pill::after {
+      display: none;
+    }
+  }
+
+  /* Floating input bar styling */
+
+  /* Prevent horizontal scroll for AI answers and make content responsive */
+  .ai-answer-font .markdown-root,
+  .ai-answer-font .prose,
+  .ai-answer-font .prose * {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Make code blocks and inline code responsive and wrap where reasonable */
+  .ai-answer-font pre,
+  .ai-answer-font code {
+    max-width: 100%;
+    white-space: pre-wrap; /* allow wrapping */
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  /* Avoid forcing very wide tables; allow them to wrap and scroll only when needed */
+  .ai-answer-font table {
+    table-layout: auto;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .ai-answer-font th,
+  .ai-answer-font td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  /* For any remaining overflow, hide horizontal scrollbar while keeping content accessible by scrolling inside table wrapper */
+  .ai-answer-font .overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .aios-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 12px;
+    background: white;
+    border-radius: 9999px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  }
+  .aios-input-field {
+    width: min(72vw, 520px);
+    font-size: 14px;
+    line-height: 1.2;
+    border: none;
+    outline: none;
+    color: #111827;
+    background: transparent;
+  }
+  .aios-input-field::placeholder {
+    color: rgba(17, 24, 39, 0.5);
+  }
+  .aios-input-cta {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    background: #7dd3fc; /* sky-300 */
+    color: #0c4a6e; /* cyan-900-ish */
+    border: 1px solid rgba(2, 132, 199, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      0 8px 18px rgba(125, 211, 252, 0.45);
+  }
+  .aios-input-cta:hover {
+    filter: brightness(1.05);
+  }
+  .aios-input-cta:active {
+    transform: scale(0.97);
+  }
+
+  /* Hero background glow - different for light/dark themes */
+  .bg-hero-glow {
+    /* Dock styles (HTML/CSS provided) */
+    .dock {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.7);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-radius: 50px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Adaptation for our React icon buttons */
+    .dock .icon-tile {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+    }
+    .dock .icon-tile:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .dock .plus-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: 700;
+      background-color: rgba(0, 0, 0, 0.08);
+      color: rgba(0, 0, 0, 0.6);
+    }
+    .dock .plus-icon:hover {
+      background-color: rgba(0, 0, 0, 0.18);
+    }
+    background: radial-gradient(
+      ellipse at center,
+      rgba(139, 92, 246, 0.15) 0%,
+      rgba(139, 92, 246, 0.05) 35%,
+      transparent 70%
+    );
+  }
+
+  .light .bg-hero-glow {
+    background: radial-gradient(
+      ellipse at center,
+      rgba(59, 130, 246, 0.25) 0%,
+      rgba(59, 130, 246, 0.12) 35%,
+      rgba(59, 130, 246, 0.04) 60%,
+      transparent 80%
+    );
+  }
+
+  /* Purple glow elements become blue in light theme */
+  .light .bg-purple-500\/10 {
+    background-color: rgba(59, 130, 246, 0.18) !important;
+  }
+
+  .light .bg-purple-500\/20 {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+  }
+
+  /* Light theme demo section adjustments */
+  .light .prose-invert {
+    color: rgb(31 41 55); /* gray-800 for better readability */
+  }
+
+  /* Light theme logo improvements */
+  .light .navbar-logo {
+    color: rgb(31 41 55); /* gray-800 for better visibility */
+    font-weight: 700;
+  }
+
+  /* Dark theme styles (existing) */
+  .glow-text-purple {
+    @apply text-[#9b87f5];
+    text-shadow: 0 0 10px rgba(155, 135, 245, 0.5),
+      0 0 20px rgba(155, 135, 245, 0.3);
+  }
+
+  .glow-text-blue {
+    @apply text-[#33C3F0];
+    text-shadow: 0 0 10px rgba(51, 195, 240, 0.5),
+      0 0 20px rgba(51, 195, 240, 0.3);
+  }
+
+  .glow-border {
+    @apply border border-purple-500/50;
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.3),
+      inset 0 0 5px rgba(139, 92, 246, 0.1);
+  }
+
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl;
+  }
+
+  .search-glow {
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2),
+      0 0 30px rgba(51, 195, 240, 0.1);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, #9b87f5, #33c3f0);
+  }
+
+  /* Beautiful AI-powered gradient */
+  .ai-powered-gradient {
+    background: linear-gradient(
+      135deg,
+      #8b5cf6 0%,
+      #06b6d4 25%,
+      #3b82f6 50%,
+      #8b5cf6 75%,
+      #06b6d4 100%
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: ai-gradient-flow 3s ease-in-out infinite;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  @keyframes ai-gradient-flow {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .highlight-link {
+    @apply relative text-white font-medium;
+  }
+
+  .highlight-link::after {
+    content: "";
+    @apply absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-purple-500 to-blue-400 transition-all duration-300;
+  }
+
+  .highlight-link:hover::after {
+    @apply w-full;
+  }
+
+  /* Typing animation cursor */
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background-color: currentColor;
+    margin-left: 0.1em;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    from,
+    to {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Prose styles for AI responses */
+  .prose {
+    @apply max-w-none text-sm sm:text-base;
+  }
+
+  .prose p {
+    @apply my-4;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply my-4 pl-6;
+  }
+
+  .prose li {
+    @apply my-1;
+  }
+
+  .prose ol {
+    @apply list-decimal;
+  }
+
+  .prose ul {
+    @apply list-disc;
+  }
+}
+
+/* Canvas open page-slide behavior */
+:root {
+  --canvas-width: 420px; /* default fallback */
+}
+
+/* Keep main UI stable when canvas opens; avoid sliding or visual filters */
+body.canvas-open #root {
+  transform: none;
+  transition: none;
+  will-change: auto;
+  filter: none;
+}
+
+/* Backdrop for canvas */
+.canvas-backdrop {
+  /* subtle translucent overlay without blurring the main UI */
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: none;
+}
+
+/* Canvas panel base styling tuned for both themes */
+.bg-card {
+  background: hsl(var(--card));
+}
+.text-card-foreground {
+  color: hsl(var(--card-foreground));
+}
+
+/* Utility colors for muted hover backgrounds across themes */
+.bg-muted\/3 {
+  background: color-mix(in oklab, hsl(var(--muted)) 8%, transparent);
+}
+.hover\:bg-muted\/6:hover {
+  background: color-mix(in oklab, hsl(var(--muted)) 12%, transparent);
+}
+
+/* Ensure the panel content is readable in light theme */
+.light .prose-invert {
+  color: rgb(31 41 55); /* dark text for light theme */
+}
+
+/* Make the canvas header more elevated */
+.bg-gradient-to-b.from-card {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, hsl(var(--card)) 85%, black 5%),
+    hsl(var(--card))
+  );
+}
+
+/* Responsive tweak: on small screens, make canvas overlay full-screen */
+@media (max-width: 700px) {
+  body.canvas-open #root {
+    transform: translateX(0);
+  }
+  .canvas-backdrop {
+    background: rgba(0, 0, 0, 0.6);
+  }
+  .fixed.right-0 {
+    /* the canvas will cover full screen on small */
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Custom cursor primitives */
+/* .custom-cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 8px hsla(var(--primary) / 0.6);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.custom-cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: 2px solid hsla(var(--primary) / 0.6);
+  background: radial-gradient(
+    circle at center,
+    hsla(var(--primary) / 0.12),
+    transparent 60%
+  );
+  box-shadow: 0 0 24px hsla(var(--primary) / 0.25);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.cursor-ripple {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  border: 2px solid hsla(var(--primary) / 0.6);
+  background: transparent;
+  transform: scale(0.6);
+  animation: cursor-ripple 0.45s ease-out forwards;
+  pointer-events: none;
+  z-index: 9997;
+}
+
+@keyframes cursor-ripple {
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+} */
+
+/* Caret for text fields (I-beam replacement) */
+/* .custom-cursor-caret {
+  position: fixed;
+  width: 2px;
+  height: 18px;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 10px hsla(var(--primary) / 0.6);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: caret-blink 1s step-end infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+} */
+
+/* Transparent search input in dark theme; subtle card in light */
+.search-input {
+  background: hsl(var(--card));
+}
+.light .search-input {
+  background: hsl(var(--card));
+}
+/* Approximate transparent effect in dark */
+:root .search-input {
+  background: color-mix(in oklab, hsl(var(--card)) 30%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+/* Modern chip styles for NewsPage categories */
+.chip-modern {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  background: linear-gradient(
+    180deg,
+    rgb(from hsl(var(--card)) r g b / 0.85),
+    rgb(from hsl(var(--card)) r g b / 0.75)
+  );
+  transition: transform 160ms ease, box-shadow 200ms ease,
+    border-color 200ms ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.chip-modern::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(168, 85, 247, 0.35),
+    rgba(59, 130, 246, 0.35),
+    rgba(168, 85, 247, 0.35)
+  );
+  filter: blur(6px);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  z-index: 0;
+}
+.chip-modern:hover::before {
+  opacity: 1;
+}
+.chip-modern:hover {
+  border-color: hsla(var(--primary) / 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+.chip-active {
+  color: hsl(var(--primary-foreground));
+  background: linear-gradient(
+    135deg,
+    hsla(var(--primary) / 0.9),
+    hsla(var(--primary) / 0.7)
+  );
+  border-color: transparent;
+  box-shadow: 0 10px 24px hsla(var(--primary) / 0.3);
+}

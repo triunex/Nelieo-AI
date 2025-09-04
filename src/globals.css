@@ -1,0 +1,16 @@
+@keyframes neon-glow {
+  0% {
+    box-shadow: 0 0 8px #a855f7, inset 0 0 4px #a855f7;
+  }
+  50% {
+    box-shadow: 0 0 16px #a855f7, inset 0 0 8px #a855f7;
+  }
+  100% {
+    box-shadow: 0 0 8px #a855f7, inset 0 0 4px #a855f7;
+  }
+}
+
+.glowing-chat {
+  animation: neon-glow 2s infinite alternate;
+  border-image: linear-gradient(45deg, #a855f7, #6b21a8, #a855f7) 1;
+}
