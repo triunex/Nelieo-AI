@@ -1,0 +1,60 @@
+# FastAgent FULL VERSION
+# Optimized for GCP VM (T4/L4) with GPU support
+
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
+
+# Avoid prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    xpra \
+    x11-xserver-utils \
+    xvfb \
+    wmctrl \
+    scrot \
+    google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
+
+# Fix python symlink
+RUN ln -s /usr/bin/python3.10 /usr/bin/python
+
+# Install ML & FastAgent dependencies
+RUN pip3 install --no-cache-dir \
+    torch torchvision torchaudio \
+    ultralytics \
+    transformers \
+    numpy \
+    pillow \
+    flask \
+    flask-cors \
+    flask-socketio \
+    requests \
+    pyautogui \
+    python-dotenv
+
+# Create app directories
+WORKDIR /opt/lumina-search-flow-main
+RUN mkdir -p /var/log /opt/omniparser/weights
+
+# Copy weights (assuming they are in weights/ directory on host)
+# The setup-vm.sh will download these for you
+COPY weights/ /opt/omniparser/weights/
+
+# Copy application code
+COPY superagent /opt/lumina-search-flow-main/superagent
+COPY aios-xpra-app/agent-api.py /opt/agent-api.py
+
+# Final environment tweaks
+ENV DISPLAY=:100
+ENV PYTHONPATH=/opt/lumina-search-flow-main
+
+EXPOSE 10000 10005
+
+# Start Xpra and Agent API
+CMD xpra start :100 --bind-tcp=0.0.0.0:10005 --html=on --start-child="python3 /opt/agent-api.py" && tail -f /var/log/agent-api.log

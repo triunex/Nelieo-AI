@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import googleSvg from "@/assets/logo-google.svg";
+import githubSvg from "@/assets/logo-github.svg";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -143,15 +145,18 @@ const Auth = () => {
 
   return (
     <motion.div
-      className="min-h-screen flex flex-col md:flex-row items-center justify-center"
+      className="min-h-screen flex flex-col md:flex-row items-center justify-center relative overflow-hidden"
       style={{
         background:
-          "linear-gradient(120deg, #18181b 0%, #181a20 60%, #101014 100%)",
+          "linear-gradient(120deg, #0b0b0e 0%, #121217 60%, #0d0d12 100%)",
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
+      {/* subtle background orbs */}
+      <span className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-purple-500/10 blur-3xl" />
+      <span className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
       {/* Left: Form */}
       <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10">
         <motion.div
@@ -220,39 +225,23 @@ const Auth = () => {
             transition={{ duration: 0.4, delay: 0.3 }}
           >
             <Tabs defaultValue="login" className="w-full">
-              <TabsList
-                className="grid w-full grid-cols-2 mb-6"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #18181b 0%, #3b2562 100%)", // darker purple/navy blend
-                  borderRadius: "0.75rem",
-                  boxShadow: "0 2px 12px 0 rgba(24,24,27,0.18)",
-                }}
-              >
+              <TabsList className="grid w-full grid-cols-2 mb-6 rounded-xl bg-white/[0.04] border border-white/10 p-1 backdrop-blur">
                 <TabsTrigger
                   value="login"
-                  className="data-[state=active]:bg-white/90 data-[state=active]:text-black data-[state=inactive]:text-white transition-colors"
-                  style={{
-                    borderRadius: "0.75rem",
-                    fontWeight: 600,
-                  }}
+                  className="rounded-lg text-white/80 data-[state=active]:bg-white data-[state=active]:text-black font-semibold transition-colors"
                 >
                   Login
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="data-[state=active]:bg-white/90 data-[state=active]:text-black data-[state=inactive]:text-white transition-colors"
-                  style={{
-                    borderRadius: "0.75rem",
-                    fontWeight: 600,
-                  }}
+                  className="rounded-lg text-white/80 data-[state=active]:bg-white data-[state=active]:text-black font-semibold transition-colors"
                 >
                   Sign up
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="login" className="animate-fade-in">
-                <Card className="border-border/40 bg-black/20 backdrop-blur-lg">
+                <Card className="border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-xl">
                   <CardHeader className="space-y-1">
                     <CardTitle className="text-xl flex items-center gap-2">
                       <LogIn size={18} />
@@ -262,25 +251,25 @@ const Auth = () => {
                       Enter your email and password to sign in
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                  <CardContent className="space-y-5">
+                    <div className="grid grid-cols-2 gap-3">
                       <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full h-10 justify-center gap-2 rounded-lg border-white/20 bg-white/[0.02] hover:bg-white/[0.06]"
                         type="button"
                         onClick={() => handleSocialAuth("github")}
                       >
-                        <Github className="mr-2 h-4 w-4" />
-                        <span>GitHub</span>
+                        <img src={githubSvg} alt="GitHub" className="w-5 h-5" />
+                        <span className="text-sm">Continue with GitHub</span>
                       </Button>
                       <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full h-10 justify-center gap-2 rounded-lg border-white/20 bg-white/[0.02] hover:bg-white/[0.06]"
                         type="button"
                         onClick={() => handleSocialAuth("google")}
                       >
-                        <Mail className="mr-2 h-4 w-4" />
-                        <span>Google</span>
+                        <img src={googleSvg} alt="Google" className="w-5 h-5" />
+                        <span className="text-sm">Continue with Google</span>
                       </Button>
                     </div>
 
@@ -289,7 +278,7 @@ const Auth = () => {
                         <span className="w-full border-t border-white/10" />
                       </div>
                       <div className="relative flex justify-center text-xs">
-                        <span className="bg-black px-2 text-gray-400">
+                        <span className="bg-transparent px-2 text-gray-400">
                           Or continue with
                         </span>
                       </div>
@@ -358,7 +347,7 @@ const Auth = () => {
                       whileTap={{ scale: 0.98 }}
                     >
                       <Button
-                        className="w-full bg-gradient-to-r from-[#2d1a3a] to-[#1e293b] hover:from-[#23132d] hover:to-[#18181b]"
+                        className="w-full bg-white text-black hover:bg-white/90"
                         onClick={() => handleAuth("login")}
                         disabled={isLoading}
                       >
@@ -370,7 +359,7 @@ const Auth = () => {
               </TabsContent>
 
               <TabsContent value="signup" className="animate-fade-in">
-                <Card className="border-border/40 bg-black/20 backdrop-blur-lg">
+                <Card className="border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-xl">
                   <CardHeader className="space-y-1">
                     <CardTitle className="text-xl flex items-center gap-2">
                       <UserPlus size={18} />
@@ -380,25 +369,25 @@ const Auth = () => {
                       Enter your information to create an account
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                  <CardContent className="space-y-5">
+                    <div className="grid grid-cols-2 gap-3">
                       <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full h-10 justify-center gap-2 rounded-lg border-white/20 bg-white/[0.02] hover:bg-white/[0.06]"
                         type="button"
                         onClick={() => handleSocialAuth("github")}
                       >
-                        <Github className="mr-2 h-4 w-4" />
-                        <span>GitHub</span>
+                        <img src={githubSvg} alt="GitHub" className="w-5 h-5" />
+                        <span className="text-sm">Continue with GitHub</span>
                       </Button>
                       <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full h-10 justify-center gap-2 rounded-lg border-white/20 bg-white/[0.02] hover:bg-white/[0.06]"
                         type="button"
                         onClick={() => handleSocialAuth("google")}
                       >
-                        <Mail className="mr-2 h-4 w-4" />
-                        <span>Google</span>
+                        <img src={googleSvg} alt="Google" className="w-5 h-5" />
+                        <span className="text-sm">Continue with Google</span>
                       </Button>
                     </div>
 
@@ -407,7 +396,7 @@ const Auth = () => {
                         <span className="w-full border-t border-white/10" />
                       </div>
                       <div className="relative flex justify-center text-xs">
-                        <span className="bg-black px-2 text-gray-400">
+                        <span className="bg-transparent px-2 text-gray-400">
                           Or continue with
                         </span>
                       </div>
@@ -551,17 +540,11 @@ const Auth = () => {
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                           >
                             I agree to the{" "}
-                            <Link
-                              to="#"
-                              className="text-blue-400 hover:underline"
-                            >
+                            <Link to="#" className="text-white hover:underline">
                               Terms of Service
                             </Link>{" "}
                             and{" "}
-                            <Link
-                              to="#"
-                              className="text-blue-400 hover:underline"
-                            >
+                            <Link to="#" className="text-white hover:underline">
                               Privacy Policy
                             </Link>{" "}
                             <span className="text-red-500">*</span>
@@ -596,7 +579,7 @@ const Auth = () => {
                       whileTap={{ scale: 0.98 }}
                     >
                       <Button
-                        className="w-full bg-gradient-to-r from-[#2d1a3a] to-[#1e293b] hover:from-[#23132d] hover:to-[#18181b]"
+                        className="w-full bg-white text-black hover:bg-white/90"
                         onClick={() => handleAuth("signup")}
                         disabled={isLoading}
                       >
@@ -610,27 +593,28 @@ const Auth = () => {
           </motion.div>
         </motion.div>
       </div>
-      {/* Right: Image */}
-      <div className="hidden md:flex w-1/2 h-[650px] items-center justify-center relative">
-        <img
-          src={bgGalaxy}
-          alt="Galaxy"
-          className="object-cover w-full h-full rounded-2xl shadow-2xl"
-          style={{
-            maxHeight: 650,
-            minWidth: 400,
-            borderRadius: "1.5rem",
-            boxShadow: "0 8px 40px 0 rgba(80,40,180,0.25)",
-          }}
-        />
-        {/* Optional: overlay for effect */}
-        <div
-          className="absolute inset-0 rounded-2xl"
-          style={{
-            background:
-              "linear-gradient(90deg,rgba(24,24,27,0.1) 0%,rgba(24,24,27,0.6) 100%)",
-          }}
-        />
+      {/* Right: Image with improved alignment */}
+      <div className="hidden md:flex w-1/2 min-h-[720px] items-center justify-center relative p-8">
+        <div className="relative w-full max-w-xl aspect-[4/3]">
+          <img
+            src={bgGalaxy}
+            alt="Galaxy"
+            className="absolute inset-0 object-cover w-full h-full rounded-2xl shadow-2xl"
+            style={{
+              borderRadius: "1.5rem",
+              boxShadow: "0 8px 40px 0 rgba(80,40,180,0.25)",
+              objectPosition: "center",
+            }}
+          />
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 rounded-2xl"
+            style={{
+              background:
+                "linear-gradient(90deg,rgba(24,24,27,0.1) 0%,rgba(24,24,27,0.55) 100%)",
+            }}
+          />
+        </div>
       </div>
     </motion.div>
   );

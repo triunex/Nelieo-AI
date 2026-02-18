@@ -7,8 +7,10 @@ services:
     environment:
       - PORT=10005
       - APP_URL=https://www.google.com
+      - DISPLAY=:0
     ports:
       - "10005:10005"
+      - "10000:10000"
     shm_size: "1gb"
     restart: unless-stopped
     # Keep the container logs attached to systemd/docker logs; adjust volumes as-needed

@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -12,7 +12,13 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-export const app = initializeApp(firebaseConfig);
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-console.log("Firebase initialized", firebaseConfig.projectId);
+// avoid noisy logs in browsers where modules may be re-imported
+try {
+  if (typeof window !== "undefined") {
+    // eslint-disable-next-line no-console
+    console.log("Firebase initialized", firebaseConfig.projectId);
+  }
+} catch {}

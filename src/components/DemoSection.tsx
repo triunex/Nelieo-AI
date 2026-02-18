@@ -1,244 +1,215 @@
 import React, { useState } from "react";
-import {
-  MessageSquare,
-  Search,
-  MessageCircle,
-  FileText,
-  Quote,
-  Link,
-} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import TypingAnimation from "./TypingAnimation";
-import { performSearch, SearchSource } from "../services/searchService";
-import { toast } from "@/hooks/use-toast";
-
-type SearchMode = "search" | "chat" | "agentic";
+import { ArrowRight, MonitorSmartphone, Command, Zap } from "lucide-react";
 
 const DemoSection = () => {
-  const [mode, setMode] = useState<SearchMode>("search");
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [showFullAnswer, setShowFullAnswer] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [answer, setAnswer] = useState("");
-  const [sources, setSources] = useState<SearchSource[]>([]);
-
-  const sampleQuestion =
-    "What are the latest developments in quantum computing?";
-
-  const handleStart = async () => {
-    setIsAnimating(false);
-    setShowFullAnswer(false);
-    setIsLoading(true);
-
-    toast({
-      title: "Processing demo query",
-      description: "Searching for information about quantum computing...",
-    });
-
-    try {
-      // Use our real search service
-      const result = await performSearch(sampleQuestion, mode);
-
-      setAnswer(result.answer);
-      setSources(result.sources);
-
-      setIsLoading(false);
-      setIsAnimating(true);
-
-      toast({
-        title: "Demo results ready",
-        description: `Found ${result.sources.length} sources about quantum computing`,
-      });
-    } catch (error) {
-      setIsLoading(false);
-
-      toast({
-        title: "Demo search failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to complete demo search",
-        variant: "destructive",
-      });
-
-      // Set fallback content for demo purposes
-      setAnswer(
-        "Unable to retrieve results at this time. Please try again later."
-      );
-      setSources([]);
-      setIsAnimating(true);
-    }
-  };
-
-  const handleAnimationComplete = () => {
-    setIsAnimating(false);
-    setShowFullAnswer(true);
-  };
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   return (
-    <section id="demo" className="py-20 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-4">
-            See <span className="gradient-text">NelieoAI</span> in Action
-          </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto">
-            Watch how our AI assistant quickly searches, analyzes, and
-            synthesizes information from across the web.
-          </p>
-        </div>
+    <section id="demo" className="py-24 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left side - Demo heading and single-line text (minimal) */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="space-y-4"
+          >
+            <h2 className="text-4xl font-bold">Cogn OS</h2>
+            <p className="text-lg text-gray-300">
+              Our World's Most Advanced and First Agentic AI Operating System.
+              Work at the speed of thought. Cogn OS thinks with you, learns from
+              you, and gets smarter every day.
+            </p>
+          </motion.div>
 
-        <div className="glass-card p-5 mb-10">
-          <div className="flex justify-between items-center mb-6">
-            <ToggleGroup
-              type="single"
-              value={mode}
-              onValueChange={(value: SearchMode) => value && setMode(value)}
-            >
-              <ToggleGroupItem
-                value="search"
-                aria-label="Search mode"
-                className="flex items-center gap-2"
+          {/* Right side - Video Demo */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="relative"
+          >
+            {/* Layered glows for depth */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-blue-500/20 rounded-[28px] blur-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 via-transparent to-rose-500/10 rounded-[28px] blur-3xl transform rotate-12" />
+
+            {/* Video Container */}
+            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-[28px] p-2 overflow-hidden shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3),0_0_80px_-12px_rgba(255,140,50,0.2)] will-change-transform">
+              <div
+                className="relative aspect-[16/9] w-full rounded-2xl bg-black/40 overflow-hidden"
+                onClick={() => setIsFullScreen(true)}
               >
-                <Search size={16} />
-                <span>Search</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="chat"
-                aria-label="Chat mode"
-                className="flex items-center gap-2"
-              >
-                <MessageCircle size={16} />
-                <span>Chat</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="agentic"
-                aria-label="Agentic mode"
-                className="flex items-center gap-2"
-              >
-                <MessageSquare size={16} />
-                <span>Agentic</span>
-              </ToggleGroupItem>
-            </ToggleGroup>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleStart}
-              disabled={isLoading}
-            >
-              {isLoading ? "Processing..." : "Try Example"}
-            </Button>
-          </div>
-
-          <div className="glass-card p-4 mb-4">
-            <div className="font-medium text-blue-400">{sampleQuestion}</div>
-          </div>
-
-          <div className="glass-card p-6">
-            <div className="prose prose-invert max-w-none">
-              {isLoading && (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-pulse flex space-x-2">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                  </div>
-                </div>
-              )}
-
-              {isAnimating ? (
-                <TypingAnimation
-                  text={answer}
-                  speed={15}
-                  onComplete={handleAnimationComplete}
-                  className="whitespace-pre-wrap"
-                  typingDelay={500}
-                />
-              ) : showFullAnswer ? (
-                <div className="whitespace-pre-wrap">{answer}</div>
-              ) : !isLoading ? (
-                <div className="text-gray-400 italic">
-                  Click "Try Example" to see the AI response...
-                </div>
-              ) : null}
-
-              {showFullAnswer && sources.length > 0 && (
-                <>
-                  <div className="mt-6 pt-4 border-t border-white/10">
-                    <div className="text-sm text-gray-400 font-semibold mb-2">
-                      Sources:
-                    </div>
-                    <div className="space-y-2">
-                      {sources.map((source, index) => (
-                        <div key={index} className="flex items-start">
-                          <span className="text-xs bg-white/10 rounded-full w-5 h-5 inline-flex items-center justify-center mr-2 mt-0.5">
-                            {index + 1}
-                          </span>
-                          <div>
-                            <a
-                              href={source.url}
-                              className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1.5"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Link size={14} />
-                              {source.title}
-                            </a>
-                            {source.snippet && (
-                              <p className="text-xs text-gray-400 mt-1">
-                                {source.snippet}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3 mt-6">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex items-center gap-1.5"
-                    >
-                      <FileText size={16} />
-                      <span>Sources</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex items-center gap-1.5"
-                    >
-                      <MessageCircle size={16} />
-                      <span>Ask follow-up</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex items-center gap-1.5"
-                    >
-                      <Quote size={16} />
-                      <span>Cite this</span>
-                    </Button>
-                  </div>
-                </>
-              )}
+                <video
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  poster="/placeholder.png"
+                >
+                  <source src="/demo.mp4" type="video/mp4" />
+                </video>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <p className="text-gray-300 mb-6">
-            Experience the full power of our AI assistant with unlimited
-            searches and advanced features.
-          </p>
-          <Button className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600">
-            Get Started
-          </Button>
+          </motion.div>
         </div>
       </div>
+
+      {/* Second demo row: video on left, text on right (Agentic Search) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left: smaller Video Container */}
+          <motion.div
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45 }}
+            className="relative"
+          >
+            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-[28px] p-2 overflow-hidden shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3),0_0_80px_-12px_rgba(255,140,50,0.18)] will-change-transform max-w-xl mx-auto">
+              <div
+                className="relative aspect-[16/9] w-full rounded-2xl bg-black/40 overflow-hidden"
+                onClick={() => setIsFullScreen(true)}
+              >
+                <video
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  poster="/placeholder.png"
+                >
+                  <source src="/demo.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right: concise Agentic Search text */}
+          <motion.div
+            initial={{ opacity: 0, x: 12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: 0.06 }}
+            className="space-y-4 lg:pl-8"
+          >
+            <h3 className="text-2xl lg:text-3xl font-semibold">
+              Agentic Search
+            </h3>
+            <p className="text-lg text-gray-300">
+              Answers that anticipate. Agentic Search understands context,
+              reasons deeply, and moves faster than any search before.
+            </p>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Third demo row: text left, video on right (Most Advanced Chat) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left: Chat text */}
+          <motion.div
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45 }}
+            className="space-y-4 lg:pr-8"
+          >
+            <h3 className="text-2xl lg:text-3xl font-semibold">
+            Advanced Chat
+            </h3>
+            <p className="text-lg text-gray-300">
+              Chat, but evolved. Built for long-form reasoning, multi-step
+              workflows, and human-like memory, Nelieo Chat is more than talk.
+              It builds Arsenals to automate your tasks, designs stunning
+              charts, and creates images or videos on command. It’s your
+              creative partner, problem-solver, and assistant, all in one.
+            </p>
+          </motion.div>
+
+          {/* Right: Video Container (match frame styling) */}
+          <motion.div
+            initial={{ opacity: 0, x: 12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: 0.06 }}
+            className="relative"
+          >
+            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-[28px] p-2 overflow-hidden shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3),0_0_80px_-12px_rgba(255,140,50,0.18)] will-change-transform">
+              <div
+                className="relative aspect-[16/9] w-full rounded-2xl bg-black/40 overflow-hidden"
+                onClick={() => setIsFullScreen(true)}
+              >
+                <video
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  poster="/placeholder.png"
+                >
+                  <source src="/demo.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Fullscreen Video Overlay */}
+      <AnimatePresence>
+        {isFullScreen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center"
+            onClick={() => setIsFullScreen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="relative w-[90vw] max-w-7xl aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <video
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                poster="/placeholder.png"
+              >
+                <source src="/demo.mp4" type="video/mp4" />
+              </video>
+
+              {/* Close button */}
+              <button
+                className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white/90 hover:text-white transition-all duration-300"
+                onClick={() => setIsFullScreen(false)}
+              >
+                <svg
+                  className="w-6 h-6"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" />
+                </svg>
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

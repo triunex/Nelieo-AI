@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface TypingAnimationProps {
   text: string;
@@ -22,12 +22,14 @@ const TypingAnimation = ({
   const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [delayDone, setDelayDone] = useState(typingDelay === 0);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     // Reset state when text or delay changes
     setDisplayedText("");
     setCurrentIndex(0);
     setDelayDone(typingDelay === 0);
+    completedRef.current = false;
   }, [text, typingDelay]);
 
   useEffect(() => {
@@ -44,8 +46,6 @@ const TypingAnimation = ({
     if (speed <= 0) {
       setDisplayedText(text);
       setCurrentIndex(text.length);
-      if (onUpdate) onUpdate(text);
-      if (onComplete) onComplete();
       return;
     }
 
@@ -53,26 +53,31 @@ const TypingAnimation = ({
     if (stop) {
       setDisplayedText(text);
       setCurrentIndex(text.length);
-      if (onUpdate) onUpdate(text);
-      if (onComplete) onComplete();
       return;
     }
 
     if (currentIndex < text.length) {
       const timeout = window.setTimeout(() => {
-        setDisplayedText((prev) => {
-          const next = prev + text[currentIndex];
-          if (onUpdate) onUpdate(next);
-          return next;
-        });
+        setDisplayedText((prev) => prev + text[currentIndex]);
         setCurrentIndex((idx) => idx + 1);
       }, speed);
 
       return () => clearTimeout(timeout);
-    } else if (onComplete) {
-      onComplete();
     }
   }, [currentIndex, text, speed, onComplete, onUpdate, typingDelay, delayDone]);
+
+  // Notify parent of updates AFTER render commit
+  useEffect(() => {
+    if (onUpdate) onUpdate(displayedText);
+  }, [displayedText, onUpdate]);
+
+  // Fire onComplete once when typing finishes
+  useEffect(() => {
+    if (!completedRef.current && displayedText.length === text.length) {
+      completedRef.current = true;
+      if (onComplete) onComplete();
+    }
+  }, [displayedText, text, onComplete]);
 
   return (
     <div className={className}>

@@ -14,3 +14,12 @@
   animation: neon-glow 2s infinite alternate;
   border-image: linear-gradient(45deg, #a855f7, #6b21a8, #a855f7) 1;
 }
+
+/* Utility: hide scrollbars while keeping scrollability */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,18 @@
+# FastAgent Update Dockerfile - Minimal Version
+# Uses fallback detection (still functional, just uses grid-based element detection)
+FROM nelieo-aios:v2-omniparser
+
+# Update superagent module with FastAgent
+COPY superagent /opt/lumina-search-flow-main/superagent
+COPY agent-api.py /opt/agent-api.py
+
+# Fix line endings
+RUN find /opt/lumina-search-flow-main/superagent -name "*.py" -exec sed -i 's/\r$//' {} \; \
+    && sed -i 's/\r$//' /opt/agent-api.py
+
+# ENV overrides
+ENV OMNIPARSER_WEIGHTS_DIR=/opt/omniparser/weights
+
+EXPOSE 10000 10005
+
+LABEL version="2.1.6-fastagent-lite"

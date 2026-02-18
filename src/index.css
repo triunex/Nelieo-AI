@@ -378,7 +378,8 @@
   .custom-scrollbar,
   .chat-scroll-smooth {
     scrollbar-width: thin;
-    scrollbar-color: #8b5cf6 transparent; /* Firefox fallback */
+    /* Firefox fallback: soft neutral grey */
+    scrollbar-color: #bdbdbd transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar,
@@ -393,17 +394,18 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb,
   .chat-scroll-smooth::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #7dd3fc 0%, #8b5cf6 100%);
+    /* Elegant grey gradient thumb for light & dark themes */
+    background: linear-gradient(180deg, #d1d5db 0%, #9ca3af 100%);
     border-radius: 999px;
     border: 2px solid rgba(0, 0, 0, 0);
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.18) inset;
-    transition: background-color 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 2px 10px rgba(60, 60, 60, 0.06) inset;
+    transition: background-color 0.2s ease, transform 0.12s ease;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover,
   .chat-scroll-smooth::-webkit-scrollbar-thumb:hover {
     transform: scale(1.02);
-    background: linear-gradient(180deg, #60a5fa 0%, #7c3aed 100%);
+    background: linear-gradient(180deg, #bdbdbd 0%, #8a8a8a 100%);
   }
 
   /* Apply same custom scrollbar to the browser default (page-level) so
@@ -412,7 +414,8 @@
   body,
   #root {
     scrollbar-width: thin;
-    scrollbar-color: rgb(130, 130, 130) transparent; /* Firefox fallback */
+    /* page-level Firefox fallback: neutral grey */
+    scrollbar-color: #bdbdbd transparent;
   }
 
   html::-webkit-scrollbar,
@@ -430,18 +433,18 @@
   html::-webkit-scrollbar-thumb,
   body::-webkit-scrollbar-thumb,
   #root::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #7dd3fc 0%, #8b5cf6 100%);
+    background: linear-gradient(180deg, #d1d5db 0%, #9ca3af 100%);
     border-radius: 999px;
     border: 2px solid rgba(0, 0, 0, 0);
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.18) inset;
-    transition: background-color 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 2px 10px rgba(60, 60, 60, 0.06) inset;
+    transition: background-color 0.2s ease, transform 0.12s ease;
   }
 
   html::-webkit-scrollbar-thumb:hover,
   body::-webkit-scrollbar-thumb:hover,
   #root::-webkit-scrollbar-thumb:hover {
     transform: scale(1.02);
-    background: linear-gradient(180deg, #60a5fa 0%, #7c3aed 100%);
+    background: linear-gradient(180deg, #bdbdbd 0%, #8a8a8a 100%);
   }
 
   @media (max-width: 640px) {

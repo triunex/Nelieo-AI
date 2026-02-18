@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nelieo-workspace-template
+  labels:
+    app: nelieo-workspace
+    tier: user-environment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nelieo-workspace
+  template:
+    metadata:
+      labels:
+        app: nelieo-workspace
+        tier: user-environment
+    spec:
+      containers:
+      - name: workspace
+        image: nelieo/aios:latest
+        imagePullPolicy: IfNotPresent
+        
+        env:
+        - name: DISPLAY
+          value: ":100"
+        - name: PORT
+          value: "10005"
+        - name: USER_ID
+          value: "USER_ID_PLACEHOLDER"  # Will be replaced during provisioning
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        
+        ports:
+        - containerPort: 10005
+          name: xpra-http
+          protocol: TCP
+        
+        resources:
+          requests:
+            memory: "6Gi"
+            cpu: "2"
+          limits:
+            memory: "8Gi"
+            cpu: "4"
+        
+        volumeMounts:
+        - name: screen-agent
+          mountPath: /opt/screen-agent
+          readOnly: true
+        - name: user-data
+          mountPath: /root/.config
+        - name: shm
+          mountPath: /dev/shm
+        
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 10005
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 10005
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      
+      volumes:
+      - name: screen-agent
+        hostPath:
+          path: /path/to/screen-agent  # Will be configured per deployment
+          type: Directory
+      - name: user-data
+        persistentVolumeClaim:
+          claimName: USER_ID_PLACEHOLDER-pvc
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 2Gi
+      
+      # Security context
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+      
+      # Node affinity for GPU nodes (if needed)
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: workload-type
+                operator: In
+                values:
+                - user-workspace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nelieo-workspace-template-svc
+  labels:
+    app: nelieo-workspace
+spec:
+  type: ClusterIP
+  ports:
+  - port: 10005
+    targetPort: 10005
+    protocol: TCP
+    name: xpra-http
+  selector:
+    app: nelieo-workspace
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: USER_ID_PLACEHOLDER-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard

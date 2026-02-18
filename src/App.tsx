@@ -22,6 +22,7 @@ import ReadNews from "@/pages/ReadNews";
 import "./globals.css";
 import ComingSoon from "@/pages/ComingSoon"; // Import ComingSoon page
 import AIOS from "@/pages/AIOS";
+import UniversalSearchDemo from "@/pages/UniversalSearchDemo";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -87,6 +88,7 @@ const App = () => {
                       <Route path="/comingsoon" element={<ComingSoon />} />{" "}
                       {/* Add Comin<RougSoon route */}
                       <Route path="/ai-os" element={<AIOS />} />
+                      <Route path="/universal" element={<UniversalSearchDemo />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

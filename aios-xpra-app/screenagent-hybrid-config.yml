@@ -1,0 +1,75 @@
+llm_api:
+  # HYBRID APPROACH: Use both GPT-4o (planning) and LLaMA (execution)
+  
+  # GPT-4o for HIGH-LEVEL PLANNING (complex reasoning, decisions)
+  planning_model:
+    model_name: "gpt-4o"
+    openai_api_key: "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"
+    target_url: "https://api.openai.com/v1/chat/completions"
+    use_for: ["planning", "decision_making", "complex_reasoning"]
+    max_calls_per_task: 3  # Limit API calls to save costs
+  
+  # LLaMA 3.2 Vision for EXECUTION (screen reading, UI control)
+  GPT4V:
+    model_name: "llama3.2-vision:11b"
+    openai_api_key: "ollama"
+    target_url: "http://host.docker.internal:11434/v1/chat/completions"
+    use_for: ["screen_analysis", "ui_detection", "action_execution"]
+    max_calls_per_task: 100  # Unlimited since it's local
+  
+  # Common settings
+  temperature: 0.7
+  top_p: 0.9
+  max_tokens: 500
+
+automaton:
+  language: "en"
+  operation_system: "linux"
+  prompt_tepmlate_dir: "/opt/screen-agent/client/prompt"
+  auto_transitions: true
+  auto_execute_actions: true
+  max_planning_attempts: 3
+  
+  # HYBRID MODE: Use planning model for strategy
+  use_hybrid_mode: true
+  planning_model_for: ["task_breakdown", "evaluation", "replanning"]
+  execution_model_for: ["screen_reading", "action_generation"]
+
+remote_vnc_server:
+  host: "localhost"
+  port: 5900
+  password: "shorya123456"
+  use_remote_clipboard: false
+  task_list: "/opt/screen-agent/client/tasks.txt"
+
+# Business Task Configurations
+business_tasks:
+  customer_support:
+    apps: ["gmail", "slack", "salesforce"]
+    complexity: "medium"
+    use_planning_model: true
+  
+  accounting:
+    apps: ["quickbooks", "google-sheets"]
+    complexity: "high"
+    use_planning_model: true
+  
+  recruiting:
+    apps: ["linkedin", "gmail", "notion"]
+    complexity: "high"
+    use_planning_model: true
+  
+  social_media:
+    apps: ["facebook", "instagram", "linkedin"]
+    complexity: "medium"
+    use_planning_model: false  # LLaMA can handle
+  
+  competition_monitoring:
+    apps: ["chrome", "notion"]
+    complexity: "high"
+    use_planning_model: true
+  
+  innovation_scouting:
+    apps: ["chrome", "notion", "asana"]
+    complexity: "high"
+    use_planning_model: true

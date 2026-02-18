@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: nelieo-waitlist
+    env: node
+    buildCommand: npm install
+    startCommand: node server-sqlite.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+    disk:
+      name: waitlist-data
+      mountPath: /opt/render/project/src
+      sizeGB: 1

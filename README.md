@@ -72,9 +72,66 @@ Security & privacy
 
 Contact & next steps
 
+<<<<<<< HEAD
+- Founder: Shourya Sharma — triumph@triunex.work (see `src/components/ContactSection.tsx` for contact UI)
+=======
 - Founder: Shourya Sharma — triunex.work@gmail.com (see `src/components/ContactSection.tsx` for contact UI)
+>>>>>>> b5f35ab316952a5aaeda7eb72973d80ce4d754b0
 - Want help deploying? Need CORS or production API tweaks? Open an issue or DM the maintainer.
 
 This is the beginning — Nelieo is assembling capabilities that used to require multiple tools into one beautiful, auditable, and extendable SuperPlatform. Join the revolution: build on it, extend it, and make it yours.
 
+<<<<<<< HEAD
+-- The Nelieo Team
+
+---
+
+## Experimental: Universal Search Streaming API
+
+An experimental unified people/research streaming endpoint that normalizes heterogeneous providers (GitHub, OpenAlex, arXiv) into a common record shape and streams them over SSE as they arrive.
+
+Endpoint
+
+`GET /api/universal-search/stream?q=<query>&lat=<optional>&lon=<optional>`
+
+Server‑Sent Events sequence
+
+- `init` – initial metadata `{ q }`
+- `intent` – parsed intent `{ entityType, filters }`
+- `providers` – engaged providers
+- `columns` – evolving inferred column list
+- `record` – each new normalized record
+- `update` – enrichment patch (skills, etc.) `{ id, patch }`
+- `done` – completion `{ total, cached }`
+
+Current providers
+
+- GitHub engineers (detail fetch for top 10 + geocoded distance if client provides lat/lon)
+- OpenAlex authors
+- arXiv authors (heuristic people extraction)
+
+Enrichment pipeline
+
+Lightweight queue performs heuristic skill extraction from bio/company and emits `update` events so the UI can live‑patch rows. Future stages will include repo language analysis and LLM summarization.
+
+Client hook
+
+`useUniversalSearch(query, { location })` – returns `{ records, columns, intent, loading, done }` while handling dedupe and updates.
+
+Demo page
+
+Navigate to `/universal` in the frontend to see a live table that updates as events stream in.
+
+Scoring
+
+Combines completeness + authority (followers/citations/stars) + proximity bonus (distance_km) for ranking.
+
+Planned next
+
+- More vertical providers (investors, startups, places, events, travel)
+- Redis + relevance re‑ranking
+- Rich skill graph & seniority inference
+- LLM powered profile synthesis
+=======
 -- Shourya ( Fucking genius Developer, Founder & CEO, Nelieo.AI)
+>>>>>>> b5f35ab316952a5aaeda7eb72973d80ce4d754b0

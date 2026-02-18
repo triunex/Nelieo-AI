@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperAgent Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 SuperAgent Test</h1>
+        <p>Test the SuperAgent API directly from the browser</p>
+        
+        <input type="text" id="taskInput" placeholder="Enter a task (e.g., 'Open Chrome')" value="Open Google Chrome">
+        <button id="executeBtn" onclick="executeTask()">Execute Task</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const executeBtn = document.getElementById('executeBtn');
+        const taskInput = document.getElementById('taskInput');
+
+        async function executeTask() {
+            const task = taskInput.value.trim();
+            if (!task) {
+                showStatus('Please enter a task', 'error');
+                return;
+            }
+
+            showStatus('🔄 Sending task to SuperAgent...', 'loading');
+            executeBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:8081/api/superagent/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task: task,
+                        timeout: 60
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Result:', result);
+
+                if (result.success) {
+                    showStatus(
+                        `✅ Success!\n\nTask: ${result.task}\nActions: ${result.actions_taken}\nDuration: ${result.duration.toFixed(1)}s\n\nFull response:\n${JSON.stringify(result, null, 2)}`,
+                        'success'
+                    );
+                } else {
+                    showStatus(
+                        `⚠️ Task failed\n\nError: ${result.error}\nActions taken: ${result.actions_taken}\nDuration: ${result.duration.toFixed(1)}s`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`❌ Error: ${error.message}\n\nMake sure:\n1. Container is running (docker ps)\n2. API is accessible (http://localhost:8081/health)\n3. CORS is enabled`, 'error');
+            } finally {
+                executeBtn.disabled = false;
+            }
+        }
+
+        function showStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = type;
+            statusDiv.style.display = 'block';
+        }
+
+        // Test connection on load
+        fetch('http://localhost:8081/health')
+            .then(r => r.json())
+            .then(data => {
+                console.log('API Health:', data);
+                showStatus(`✅ Connected to API\nStatus: ${data.status}`, 'success');
+            })
+            .catch(err => {
+                console.error('Connection failed:', err);
+                showStatus(`❌ Cannot connect to API\n\nError: ${err.message}\n\nMake sure container is running on port 8081`, 'error');
+            });
+    </script>
+</body>
+</html>

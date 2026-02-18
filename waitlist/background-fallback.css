@@ -1,0 +1,32 @@
+/* 
+ * If wallpaper.jpg is not available, this CSS will create a beautiful gradient background
+ * Replace this by adding your wallpaper.jpg file to the waitlist folder
+ */
+
+.background-image {
+    background: linear-gradient(
+        135deg,
+        #667eea 0%,
+        #764ba2 25%,
+        #f093fb 50%,
+        #667eea 75%,
+        #764ba2 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Alternative: Use your wallpaper by saving it as wallpaper.jpg in the waitlist folder */
+/* The main styles.css will automatically use wallpaper.jpg if it exists */

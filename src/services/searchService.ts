@@ -19,6 +19,21 @@ export interface SearchResponse {
   }>;
   sources: SearchSource[]; // Add the 'sources' property
   images?: string[]; // Optional images for richer rendering
+  verification?: {
+    confidence: number;
+    contradictions: string[];
+    missing_citations: Array<{ snippet: string; suggestion: string }>;
+  };
+  plan?:
+    | {
+        subqueries?: Array<{
+          query: string;
+          rationale?: string;
+          priority?: number;
+        }>;
+      }
+    | any;
+  contacts?: { emails?: string[]; phones?: string[]; socials?: string[] };
 }
 
 // Define and export SearchSource type
@@ -29,7 +44,10 @@ export type SearchSource = {
 };
 
 // 🔍 Fetch Results from SERP API via Proxy
-export async function fetchSearchResults(query: string): Promise<any[]> {
+export async function fetchSearchResults(
+  query: string,
+  engine?: string
+): Promise<any[]> {
   try {
     const RENDER_BASE =
       (window as any).__COGNIX_RENDER_BASE__ ||
@@ -39,19 +57,37 @@ export async function fetchSearchResults(query: string): Promise<any[]> {
       (window as any)?.auth?.currentUser?.uid ||
       (window as any).__COGNIX_USER_ID__ ||
       "demo";
-    const response = await fetch(`${RENDER_BASE}/api/search`, {
+
+    // Prefer sending engine as both query param and in body for proxy compatibility
+    const url = `${RENDER_BASE}/api/search${
+      engine ? `?engine=${encodeURIComponent(engine)}` : ""
+    }`;
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-user-id": userId,
       },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, engine }),
     });
 
     const data = await response.json();
-    return data.answer; // This will contain Gemini's summarized answer
+
+    // Be flexible: try common shapes returned by different proxies
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.results)) return data.results;
+    if (Array.isArray(data.items)) return data.items;
+    if (Array.isArray(data.answer)) return data.answer;
+
+    // Fallback: sometimes the proxy returns an object with nested arrays
+    if (data && typeof data === "object") {
+      const possible = data.results || data.items || data.data || [];
+      return Array.isArray(possible) ? possible : [];
+    }
+
+    return [];
   } catch (error: any) {
-    console.error("fetchSearchResults error:", error.message);
+    console.error("fetchSearchResults error:", error?.message || error);
     throw new Error("Failed to fetch search results.");
   }
 }
@@ -125,7 +161,8 @@ function cleanAndRankResults(results: any[]): any[] {
 export async function performSearch(
   query: string,
   mode: "chat" | "search" | "agentic" = "search",
-  model: string = "gemini-1.5-flash"
+  model: string = "gemini-1.5-flash",
+  engine?: string
 ): Promise<SearchResponse> {
   try {
     if (mode === "agentic") {
@@ -136,7 +173,7 @@ export async function performSearch(
       const r = await fetch("https://cognix-api.onrender.com/api/agentic-v2", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-user-id": userId },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query, fast: true, verify: true }),
       });
       const data = await r.json();
       // Use formatted_answer if available, fallback to raw_answer or generic answer
@@ -157,10 +194,13 @@ export async function performSearch(
           snippet: "",
         })),
         images: Array.isArray(data.images) ? data.images : [],
+        verification: data.verification || undefined,
+        plan: data.plan || undefined,
+        contacts: data.contacts || undefined,
       };
     }
 
-    const results = await fetchSearchResults(query);
+    const results = await fetchSearchResults(query, engine);
     const validResults = Array.isArray(results) ? results : [];
 
     // Clean and rank results

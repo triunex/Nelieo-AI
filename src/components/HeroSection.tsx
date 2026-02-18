@@ -25,6 +25,7 @@ const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [mode, setMode] = useState<SearchMode>("search");
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showFullAnswer, setShowFullAnswer] = useState(false);
@@ -115,14 +116,6 @@ const HeroSection = () => {
       />
     );
   };
-
-  // Sample questions for suggestion chips
-  const sampleQuestions = [
-    "Latest AI advancements",
-    "Climate change solutions",
-    "Space exploration news",
-    "Quantum computing explained",
-  ];
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,400 +228,52 @@ const HeroSection = () => {
             before.
           </motion.p>
 
+          {/* Modern glassy video frame */}
           <motion.div
-            className="mb-4 flex justify-center"
-            initial={{ y: 8, opacity: 0 }}
+            className="relative max-w-4xl mx-auto mt-8 mb-12"
+            initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.45, delay: 0.12 }}
+            transition={{ duration: 0.5, delay: 0.12 }}
           >
-            <ToggleGroup
-              type="single"
-              value={mode}
-              onValueChange={(value: SearchMode) => value && setMode(value)}
-              className="bg-white/5 backdrop-blur-sm rounded-full p-1"
-            >
-              <ToggleGroupItem
-                value="search"
-                aria-label="Search mode"
-                className="rounded-full flex items-center gap-1 px-4"
+            {/* Layered glows for depth */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-blue-500/20 rounded-[28px] blur-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 via-transparent to-rose-500/10 rounded-[28px] blur-3xl transform rotate-12" />
+            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-[28px] p-2 overflow-hidden shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3),0_0_80px_-12px_rgba(255,140,50,0.2)] will-change-transform">
+              <div
+                className="group relative aspect-[16/9] w-full rounded-2xl bg-black/40 overflow-hidden cursor-pointer"
+                onClick={() => setIsFullScreen(true)}
               >
-                <SearchIcon size={16} />
-                <span>Search</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="chat"
-                aria-label="Chat mode"
-                className="rounded-full flex items-center gap-1 px-4"
-              >
-                <MessageCircle size={16} />
-                <span>Chat</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="agentic"
-                aria-label="Agentic mode"
-                className="rounded-full flex items-center gap-1 px-4"
-              >
-                <MessageSquare size={16} />
-                <span>Agentic</span>
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </motion.div>
+                {/* Demo video - replace src with your actual demo video */}
+                <video
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  poster="/placeholder.png"
+                >
+                  <source src="Examples/Demo.mp4" type="video/mp4" />
+                </video>
 
-          <motion.form
-            onSubmit={handleSearch}
-            className="relative mb-6"
-            initial={{ y: 8, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45, delay: 0.18 }}
-          >
-            <div className="relative max-w-2xl mx-auto">
-              <Input
-                type="text"
-                placeholder={
-                  mode === "search"
-                    ? "Ask anything... Try 'What are the latest AI advancements?'"
-                    : mode === "chat"
-                    ? "Chat with AI... Try 'Tell me about climate change'"
-                    : "Use AI agent... Try 'Research and summarize space exploration'"
-                }
-                className="h-14 pl-12 pr-32 rounded-full bg-white/5 backdrop-blur-md border border-white/10 search-glow placeholder:text-gray-500 text-base"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <SearchIcon
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
-              />
-              <Button
-                type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 rounded-full"
-                disabled={isSearching}
-              >
-                {isSearching
-                  ? "Searching..."
-                  : mode === "search"
-                  ? "Search"
-                  : mode === "chat"
-                  ? "Chat"
-                  : "Go"}
-              </Button>
-            </div>
-          </motion.form>
-
-          {/* Perplexity-style, boxless loader with shimmer, reflection, and edge-faded ticker */}
-          <AnimatePresence>
-            {isSearching && (
-              <motion.div
-                className="relative mt-8 max-w-2xl mx-auto w-full"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35 }}
-              >
-                {/* Ambient gradient glow (no container box) */}
-                <div className="pointer-events-none absolute -inset-x-24 -top-10 h-24 -z-10 blur-3xl opacity-40 bg-gradient-to-r from-purple-500/35 via-blue-500/25 to-pink-500/35" />
-
-                {/* Thin shimmer progress line */}
-                <div className="relative h-[2px] overflow-hidden rounded-full">
-                  <motion.div
-                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-current to-transparent"
-                    style={{ color: theme === "light" ? "#6b7280" : "#d1d5db" }}
-                    animate={{ x: ["-30%", "120%"] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 1.6,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </div>
-
-                {/* Neural bars */}
-                <div className="mt-5 flex items-end justify-center gap-2 h-10">
-                  {[...Array(9)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="w-1.5 rounded-full bg-gradient-to-b from-fuchsia-500 to-indigo-500"
-                      animate={{ height: [8, 42, 10], opacity: [0.6, 1, 0.75] }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 1.05,
-                        delay: i * 0.07,
-                        ease: "easeInOut",
-                      }}
-                      style={{ filter: "saturate(115%)" }}
-                    />
-                  ))}
-                </div>
-
-                {/* Status with mirror/reflection */}
-                <div className="mt-4 text-center select-none">
-                  <motion.div
-                    key={statusIndex}
-                    className={
-                      theme === "light"
-                        ? "text-sm text-gray-700"
-                        : "text-sm text-gray-200"
-                    }
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.25 }}
-                  >
-                    <span className="font-medium tracking-wide">
-                      {statuses[statusIndex]}
-                    </span>
-                  </motion.div>
-                  <div
-                    aria-hidden="true"
-                    className="mx-auto mt-1"
-                    style={{
-                      width: "fit-content",
-                      WebkitMaskImage:
-                        "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0))",
-                      maskImage:
-                        "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0))",
-                    }}
-                  >
-                    <div
-                      className={
-                        (theme === "light"
-                          ? "text-gray-700"
-                          : "text-gray-200") +
-                        " text-sm transform scale-y-[-1] opacity-30"
-                      }
+                {/* Hover overlay with See Full Demo button */}
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm flex items-center justify-center">
+                  <button className="transform scale-95 group-hover:scale-100 transition-all duration-300 px-6 py-3 bg-white/15 hover:bg-white/25 backdrop-blur-md rounded-full border border-white/30 flex items-center gap-2 text-white font-medium">
+                    <svg
+                      className="w-5 h-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
                     >
-                      {statuses[statusIndex]}
-                    </div>
-                  </div>
+                      <path d="M15 5v14M5 12h14" strokeLinecap="round" />
+                    </svg>
+                    See Full Demo
+                  </button>
                 </div>
-
-                {/* Source ticker with edge fade masks */}
-                <div className="relative mt-4">
-                  {/* Edge fades */}
-                  <div
-                    className="pointer-events-none absolute inset-y-0 left-0 w-16 z-10"
-                    style={{
-                      background:
-                        theme === "light"
-                          ? "linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0))"
-                          : "linear-gradient(90deg, rgba(2,6,23,1), rgba(2,6,23,0))",
-                    }}
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-y-0 right-0 w-16 z-10"
-                    style={{
-                      background:
-                        theme === "light"
-                          ? "linear-gradient(270deg, rgba(255,255,255,1), rgba(255,255,255,0))"
-                          : "linear-gradient(270deg, rgba(2,6,23,1), rgba(2,6,23,0))",
-                    }}
-                  />
-                  <div className="overflow-hidden">
-                    <motion.div
-                      className="flex items-center gap-4 will-change-transform"
-                      animate={{ x: ["0%", "-100%"] }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 12,
-                        ease: "linear",
-                      }}
-                    >
-                      {[
-                        ...(displaySources && displaySources.length
-                          ? displaySources
-                          : placeholderSources
-                        ).map((s: any) => ({
-                          name: s.name,
-                          domain: s.domain,
-                          logo: s.logo,
-                        })),
-                        ...(displaySources && displaySources.length
-                          ? displaySources
-                          : placeholderSources
-                        ).map((s: any) => ({
-                          name: s.name,
-                          domain: s.domain,
-                          logo: s.logo,
-                        })),
-                      ].map((src, idx) => (
-                        <div
-                          key={idx}
-                          className={
-                            (theme === "light"
-                              ? "bg-white border border-gray-200 text-gray-700"
-                              : "bg-white/5 border border-white/10 text-gray-200") +
-                            " min-w-fit inline-flex items-center gap-2 px-2.5 py-1 rounded-full"
-                          }
-                        >
-                          {src.domain ? (
-                            <FaviconImg domain={src.domain} alt={src.name} />
-                          ) : (
-                            <img
-                              src={src.logo}
-                              alt={src.name}
-                              className="w-5 h-5 object-contain rounded"
-                            />
-                          )}
-                          <span className="text-xs opacity-90">{src.name}</span>
-                        </div>
-                      ))}
-                    </motion.div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Error display */}
-          {error && (
-            <div className="bg-red-900/20 backdrop-blur-sm rounded-lg p-4 border border-red-500/30 mt-4 mb-6 max-w-3xl mx-auto text-left">
-              <p className="text-red-300">{error}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2 border-red-500/50 text-red-300 hover:bg-red-900/30"
-                onClick={() => setError(null)}
-              >
-                Dismiss
-              </Button>
-            </div>
-          )}
-
-          {/* Search results section */}
-          {showAnswer && (
-            <div
-              className={
-                `rounded-lg p-6 mt-8 mb-6 max-w-3xl mx-auto text-left animate-fade-in backdrop-blur-sm ` +
-                (theme === "light"
-                  ? "bg-white border border-gray-200 text-foreground shadow-md"
-                  : "bg-white/10 border border-white/10 text-foreground")
-              }
-            >
-              <div className="prose max-w-none dark:prose-invert">
-                {isAnimating ? (
-                  <>
-                    {/* Live structured rendering while typing */}
-                    <StructuredAnswer
-                      answerText={livePartial || ""}
-                      sources={currentSources}
-                      images={currentImages}
-                    />
-                    <TypingAnimation
-                      text={currentAnswer}
-                      speed={6}
-                      onUpdate={(t) => setLivePartial(t)}
-                      onComplete={handleAnimationComplete}
-                      className="sr-only" /* hide raw text cursor */
-                      typingDelay={150}
-                    />
-                  </>
-                ) : showFullAnswer ? (
-                  mode === "agentic" ? (
-                    <StructuredAnswer
-                      answerText={currentAnswer}
-                      sources={currentSources}
-                      images={currentImages}
-                    />
-                  ) : (
-                    <div className="whitespace-pre-wrap leading-relaxed text-foreground">
-                      {sanitizePlain(currentAnswer)}
-                    </div>
-                  )
-                ) : (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-pulse flex space-x-2">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    </div>
-                  </div>
-                )}
-
-                {showFullAnswer && currentSources.length > 0 && (
-                  <>
-                    <div className="mt-6 pt-4 border-t border-white/10">
-                      <div className="text-sm text-gray-400 font-semibold mb-2">
-                        Sources:
-                      </div>
-                      <div className="space-y-2">
-                        {currentSources.map((source, index) => (
-                          <div key={index} className="flex items-start">
-                            <span className="text-xs bg-white/10 rounded-full w-5 h-5 inline-flex items-center justify-center mr-2 mt-0.5">
-                              {index + 1}
-                            </span>
-                            <div>
-                              <a
-                                href={source.url}
-                                className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1.5"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Link size={14} />
-                                {source.title}
-                              </a>
-                              {source.snippet && (
-                                <p className="text-xs text-gray-400 mt-1">
-                                  {source.snippet}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 mt-6">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center gap-1.5"
-                      >
-                        <FileText size={16} />
-                        <span>Sources</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center gap-1.5"
-                        onClick={handleAskFollowup}
-                      >
-                        <MessageCircle size={16} />
-                        <span>Ask follow-up</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center gap-1.5"
-                      >
-                        <FileText size={16} />
-                        <span>Cite this</span>
-                      </Button>
-                    </div>
-                  </>
-                )}
               </div>
             </div>
-          )}
-
-          <div
-            className="text-sm text-gray-400 flex flex-col md:flex-row items-center justify-center gap-3 animate-fade-in"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <p>Try questions like:</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {sampleQuestions.map((question, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-white/5 rounded-full cursor-pointer hover:bg-white/10 transition-colors"
-                  onClick={() => setQuery(question)}
-                >
-                  {question}
-                </span>
-              ))}
-            </div>
-          </div>
+          </motion.div>
 
           {/* Add a prominent "Get Started" button at the end */}
           <div
@@ -646,6 +291,56 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Video Overlay */}
+      <AnimatePresence>
+        {isFullScreen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center"
+            onClick={() => setIsFullScreen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="relative w-[90vw] max-w-7xl aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <video
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                poster="/placeholder.png"
+              >
+                <source src="/demo.mp4" type="video/mp4" />
+              </video>
+
+              {/* Close button */}
+              <button
+                className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white/90 hover:text-white transition-all duration-300"
+                onClick={() => setIsFullScreen(false)}
+              >
+                <svg
+                  className="w-6 h-6"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" />
+                </svg>
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 };

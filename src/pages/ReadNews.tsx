@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   X,
@@ -30,7 +30,7 @@ const ReadNews = () => {
     null
   );
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [showArticleChat, setShowArticleChat] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
 
@@ -59,17 +59,39 @@ const ReadNews = () => {
     setIsSummarizing(true);
     setSummary("");
 
-    const res = await fetch(
-      "https://cognix-api.onrender.com/api/summarize-article",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: articleData.content }),
+    try {
+      const res = await fetch(
+        "https://cognix-api.onrender.com/api/summarize-article",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: articleData.content }),
+        }
+      );
+      if (!res.ok) {
+        // Try fallback endpoint name
+        const fallback = await fetch(
+          "https://cognix-api.onrender.com/api/summarize",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: articleData.content }),
+          }
+        );
+        if (!fallback.ok) throw new Error("Both summarize endpoints failed");
+        const fbData = await fallback.json().catch(() => ({}));
+        setSummary(
+          fbData.summary || fbData.result || "❌ Could not generate summary."
+        );
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSummary(
+          data.summary || data.result || "❌ Could not generate summary."
+        );
       }
-    );
-
-    const data = await res.json();
-    setSummary(data.summary || "❌ Could not generate summary.");
+    } catch (e) {
+      setSummary("❌ Summarization failed. Please try again.");
+    }
     setIsSummarizing(false);
   };
 
@@ -122,29 +144,233 @@ const ReadNews = () => {
   };
 
   const handleChatSubmit = async () => {
-    const updatedMessages = [
-      ...chatMessages,
-      { role: "user", content: chatInput },
-    ];
-    setChatMessages(updatedMessages);
-    setChatInput("");
-
-    const prompt = `You're an expert assistant. Discuss this article:\n\n${articleData.content}\n\nUser says: ${chatInput}`;
-
-    const res = await fetch(
-      "https://cognix-api.onrender.com/api/summarize-article",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: prompt }),
-      }
-    );
-
-    const data = await res.json();
-    setChatMessages([
-      ...updatedMessages,
-      { role: "assistant", content: data.summary },
+    if (!chatInput.trim()) return;
+    const userMsg = { role: "user", content: chatInput.trim() };
+    setChatMessages((prev) => [
+      ...prev,
+      userMsg,
+      { role: "assistant", content: "__loading__" },
     ]);
+    const currentInput = chatInput.trim();
+    setChatInput("");
+    const prompt = `You are a helpful expert assistant. Provide a structured, clear, modern answer. Avoid markdown symbols like # * **. Use concise heading lines, bullet points (use •), numbered steps (1.), short paragraphs, and horizontal separators where it improves clarity.\n\nARTICLE CONTENT BEGIN\n${articleData.content}\nARTICLE CONTENT END\n\nUser: ${currentInput}`;
+
+    try {
+      const res = await fetch(
+        "https://cognix-api.onrender.com/api/summarize-article",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: prompt }),
+        }
+      );
+      let data: any = {};
+      if (res.ok) data = await res.json().catch(() => ({}));
+      else {
+        const res2 = await fetch(
+          "https://cognix-api.onrender.com/api/summarize",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: prompt }),
+          }
+        );
+        if (res2.ok) data = await res2.json().catch(() => ({}));
+      }
+      const answer = data.summary || data.result || "No answer available.";
+      setChatMessages((prev) => {
+        const idx = prev.findIndex(
+          (m) => m.role === "assistant" && m.content === "__loading__"
+        );
+        if (idx !== -1) {
+          const clone = [...prev];
+          clone[idx] = { role: "assistant", content: answer };
+          return clone;
+        }
+        return [...prev, { role: "assistant", content: answer }];
+      });
+    } catch (e) {
+      setChatMessages((prev) => {
+        const idx = prev.findIndex(
+          (m) => m.role === "assistant" && m.content === "__loading__"
+        );
+        if (idx !== -1) {
+          const clone = [...prev];
+          clone[idx] = {
+            role: "assistant",
+            content: "❌ Failed to fetch answer.",
+          };
+          return clone;
+        }
+        return [
+          ...prev,
+          { role: "assistant", content: "❌ Failed to fetch answer." },
+        ];
+      });
+    }
+  };
+
+  // Inline structured renderer (local to this file per instructions)
+  const StructuredBubble = ({ text }: { text: string }) => {
+    const blocks = useMemo(() => {
+      if (!text) return [] as any[];
+      if (text === "__loading__") return [{ type: "loading" }];
+      const cleaned = text.replace(/[\r\t]+/g, "").trim();
+      const lines = cleaned
+        .split(/\n+/)
+        .map((l) => l.trim())
+        .filter(Boolean);
+      const result: any[] = [];
+      let currentPara: string[] = [];
+      const flushPara = () => {
+        if (currentPara.length) {
+          result.push({ type: "para", text: currentPara.join(" ") });
+          currentPara = [];
+        }
+      };
+      lines.forEach((line) => {
+        // heading heuristic: short line < 80 chars, no trailing punctuation, capitalized words
+        if (/^(={3,}|-{3,})$/.test(line)) {
+          flushPara();
+          result.push({ type: "sep" });
+          return;
+        }
+        if (/^\d+\./.test(line)) {
+          flushPara();
+          const match = line.match(/^(\d+)\.\s*(.*)$/);
+          if (match)
+            result.push({
+              type: "number",
+              index: parseInt(match[1], 10),
+              text: match[2],
+            });
+          return;
+        }
+        if (/^(\*|-|•)\s+/.test(line)) {
+          flushPara();
+          result.push({
+            type: "bullet",
+            text: line.replace(/^(\*|-|•)\s+/, ""),
+          });
+          return;
+        }
+        const isHeading =
+          line.length < 80 &&
+          /[A-Za-z]/.test(line) &&
+          !/[.:;]$/.test(line) &&
+          line
+            .split(/\s+/)
+            .filter((w) => w)
+            .every((w) => /^[A-Z0-9]/.test(w));
+        if (isHeading) {
+          flushPara();
+          result.push({ type: "heading", text: line.replace(/^[#*>\s]+/, "") });
+          return;
+        }
+        if (line.length === 0) {
+          flushPara();
+        } else {
+          currentPara.push(line);
+        }
+      });
+      flushPara();
+      // Insert separators between distinct semantic groups (heading -> others)
+      const enhanced: any[] = [];
+      for (let i = 0; i < result.length; i++) {
+        enhanced.push(result[i]);
+        if (i < result.length - 1) {
+          const a = result[i];
+          const b = result[i + 1];
+          if (a.type === "para" && b.type === "heading")
+            enhanced.push({ type: "sep-soft" });
+        }
+      }
+      return enhanced;
+    }, [text]);
+
+    return (
+      <div className="space-y-3">
+        {blocks.map((b, i) => {
+          if (b.type === "loading") {
+            return (
+              <div
+                key={i}
+                className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse"
+              >
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" />
+                Thinking...
+              </div>
+            );
+          }
+          if (b.type === "heading") {
+            return (
+              <div
+                key={i}
+                className="text-sm font-semibold tracking-wide relative pl-3 py-1 rounded-md bg-gradient-to-r from-purple-500/10 to-transparent text-purple-300"
+              >
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500 rounded-l" />
+                {b.text}
+              </div>
+            );
+          }
+          if (b.type === "bullet") {
+            return (
+              <div
+                key={i}
+                className="flex items-start gap-2 text-xs sm:text-sm"
+              >
+                <span className="mt-1 w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 shadow" />
+                <span className="text-muted-foreground leading-relaxed">
+                  {b.text}
+                </span>
+              </div>
+            );
+          }
+          if (b.type === "number") {
+            return (
+              <div
+                key={i}
+                className="flex items-start gap-3 text-xs sm:text-sm"
+              >
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-[10px] font-bold text-purple-300 shadow-inner">
+                  {b.index}
+                </span>
+                <span className="text-muted-foreground leading-relaxed">
+                  {b.text}
+                </span>
+              </div>
+            );
+          }
+          if (b.type === "sep") {
+            return (
+              <div
+                key={i}
+                className="h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent"
+              />
+            );
+          }
+          if (b.type === "sep-soft") {
+            return (
+              <div
+                key={i}
+                className="h-px bg-gradient-to-r from-transparent via-purple-400/20 to-transparent"
+              />
+            );
+          }
+          if (b.type === "para") {
+            return (
+              <p
+                key={i}
+                className="text-xs sm:text-sm leading-relaxed text-foreground/90 font-light"
+              >
+                {b.text}
+              </p>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -427,44 +653,133 @@ const ReadNews = () => {
 
       {/* Chat Panel */}
       {showArticleChat && (
-        <div className="fixed bottom-4 sm:bottom-10 right-4 sm:right-6 w-[90vw] sm:w-[400px] h-[70vh] sm:h-[480px] bg-card backdrop-blur-lg border border-border shadow-xl text-foreground rounded-3xl z-50 glowing-chat p-4 overflow-hidden animate-fade-in">
-          <button
-            onClick={() => setShowArticleChat(false)}
-            className="absolute top-2 right-2 hover:text-red-500 text-xl"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          <div className="h-full flex flex-col justify-between pt-6">
-            <div className="overflow-y-auto space-y-3 pr-2 max-h-[55vh]">
-              {chatMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`text-sm ${
-                    msg.role === "user" ? "text-blue-500" : "text-green-600"
-                  }`}
-                >
-                  <strong>{msg.role === "user" ? "You" : "CogniX"}:</strong>{" "}
-                  {msg.content}
-                </div>
-              ))}
+        <div className="fixed bottom-4 sm:bottom-8 right-4 sm:right-6 w-[92vw] sm:w-[440px] h-[72vh] sm:h-[520px] text-foreground z-50 animate-fade-in">
+          <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-purple-500/20 backdrop-blur-xl bg-gradient-to-br from-[#1c1028]/90 via-[#0f1017]/85 to-[#101a24]/90">
+            <div
+              className="absolute inset-0 pointer-events-none opacity-40 mix-blend-overlay"
+              style={{
+                background:
+                  "radial-gradient(circle at 20% 30%, rgba(168,85,247,0.35), transparent 60%), radial-gradient(circle at 80% 70%, rgba(236,72,153,0.25), transparent 55%)",
+              }}
+            />
+            <button
+              onClick={() => setShowArticleChat(false)}
+              className="absolute top-3 right-3 p-2 rounded-full bg-white/5 hover:bg-white/10 text-purple-200 hover:text-pink-200 transition"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="absolute left-4 top-4 text-xs uppercase tracking-wider font-semibold text-purple-300/70 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-green-500/50 shadow" />
+              Article Chat
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 mt-4">
-              <input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Ask something..."
-                className="flex-1 px-3 py-2 rounded-lg bg-muted text-foreground border border-border"
-              />
-              <button
-                onClick={handleChatSubmit}
-                className="px-3 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition"
-              >
-                <SendHorizonal className="w-5 h-5" />
-              </button>
+            <div className="h-full flex flex-col pt-10 pb-4 px-5">
+              <div className="flex-1 overflow-y-auto pr-2 space-y-5 custom-scrollbar">
+                {chatMessages.length === 0 && (
+                  <div className="text-xs sm:text-sm text-muted-foreground/70 italic mt-4">
+                    Ask contextual questions about the article. Try: <br />
+                    <span className="text-purple-300/80">
+                      "Give 5 key insights"
+                    </span>
+                    ,{" "}
+                    <span className="text-purple-300/80">
+                      "List stakeholders impacted"
+                    </span>
+                    ,{" "}
+                    <span className="text-purple-300/80">
+                      "Provide a concise risk summary"
+                    </span>
+                  </div>
+                )}
+                {chatMessages.map((msg, idx) => {
+                  const isUser = msg.role === "user";
+                  return (
+                    <div
+                      key={idx}
+                      className={`group relative ${isUser ? "ml-8" : "mr-4"}`}
+                    >
+                      <div
+                        className={`rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-lg/30 shadow-inner backdrop-blur-md ring-1 ${
+                          isUser
+                            ? "bg-gradient-to-br from-purple-600/30 via-purple-500/20 to-fuchsia-500/20 ring-purple-500/40 text-purple-50"
+                            : "bg-white/5 ring-white/10 text-foreground/90"
+                        }`}
+                      >
+                        {isUser ? (
+                          <p className="font-medium text-[11px] uppercase tracking-wider mb-1 text-purple-200/90">
+                            You
+                          </p>
+                        ) : (
+                          <p className="font-medium text-[11px] uppercase tracking-wider mb-1 text-pink-200/80">
+                            CogniX
+                          </p>
+                        )}
+                        {isUser ? (
+                          <p className="whitespace-pre-wrap break-words font-light">
+                            {msg.content}
+                          </p>
+                        ) : (
+                          <StructuredBubble text={msg.content} />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="flex gap-2">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleChatSubmit();
+                      }
+                    }}
+                    placeholder="Ask something..."
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 focus:bg-white/10 transition text-foreground text-xs sm:text-sm placeholder:text-foreground/40 focus:outline-none border border-white/10 focus:border-purple-400/40"
+                  />
+                  <button
+                    onClick={handleChatSubmit}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium shadow-lg shadow-purple-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
+                    disabled={!chatInput.trim()}
+                    title="Send"
+                  >
+                    <SendHorizonal className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {[
+                    "Key points",
+                    "Pros & cons",
+                    "Action steps",
+                    "Risks",
+                    "Explain like I'm 12",
+                  ].map((q) => (
+                    <button
+                      key={q}
+                      onClick={() => {
+                        setChatInput(q);
+                        setTimeout(() => handleChatSubmit(), 50);
+                      }}
+                      className="text-[10px] sm:text-[11px] px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-foreground/70 hover:text-foreground border border-white/10"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
+          <style>{`
+            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(168,85,247,0.4), rgba(236,72,153,0.35)); border-radius: 3px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(168,85,247,0.55), rgba(236,72,153,0.5)); }
+            @keyframes fadeInScale { 0% { opacity:0; transform: translateY(8px) scale(.98);} 100% { opacity:1; transform: translateY(0) scale(1);} }
+            .animate-fade-in { animation: fadeInScale .5s ease; }
+          `}</style>
         </div>
       )}
     </div>

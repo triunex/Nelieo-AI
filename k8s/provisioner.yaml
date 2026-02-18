@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: workspace-provisioner-config
+  namespace: default
+data:
+  config.json: |
+    {
+      "baseImage": "nelieo/aios:latest",
+      "screenAgentPath": "/mnt/screen-agent",
+      "defaultResources": {
+        "requests": {
+          "memory": "6Gi",
+          "cpu": "2"
+        },
+        "limits": {
+          "memory": "8Gi",
+          "cpu": "4"
+        }
+      },
+      "storageSize": "20Gi",
+      "domain": "workspace.nelieo.ai"
+    }
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: workspace-provisioner
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: workspace-provisioner-role
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "persistentvolumeclaims"]
+  verbs: ["get", "list", "create", "update", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "create", "update", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "create", "update", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: workspace-provisioner-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: workspace-provisioner
+  namespace: default
+roleRef:
+  kind: Role
+  name: workspace-provisioner-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workspace-provisioner
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workspace-provisioner
+  template:
+    metadata:
+      labels:
+        app: workspace-provisioner
+    spec:
+      serviceAccountName: workspace-provisioner
+      containers:
+      - name: provisioner
+        image: nelieo/workspace-provisioner:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KUBECONFIG
+          value: "/etc/kubernetes/config"
+        - name: NAMESPACE
+          value: "default"
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: config
+          mountPath: /etc/provisioner
+      volumes:
+      - name: config
+        configMap:
+          name: workspace-provisioner-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workspace-provisioner-svc
+  namespace: default
+spec:
+  selector:
+    app: workspace-provisioner
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  type: ClusterIP

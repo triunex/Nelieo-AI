@@ -1,0 +1,72 @@
+version: "3.8"
+services:
+  aios_phase1:
+    build:
+      context: ./aios-xpra-app
+      dockerfile: Dockerfile
+    container_name: aios_nelieo_phase1
+    environment:
+      - PORT=10005
+      - DISPLAY=:100
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/opt:/opt/screen-agent:/opt/lumina-search-flow-main
+      # AI API Keys (set these in your environment or .env file)
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyDyzE-XpLGRzQPDdtD8I25f7Yg8itVODCk}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - ENV_GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyDyzE-XpLGRzQPDdtD8I25f7Yg8itVODCk}
+      - ENV_OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ENV_ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ENV_OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      # Vertex AI Configuration (for using GCP credits instead of free tier)
+      - USE_VERTEX_AI=${USE_VERTEX_AI:-false}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-}
+      - VERTEX_LOCATION=${VERTEX_LOCATION:-us-central1}
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-}
+      # ScreenAgent Configuration
+      - SCREEN_AGENT_MODEL=${SCREEN_AGENT_MODEL:-gpt-4o-mini}
+      - SCREEN_AGENT_LOG_LEVEL=${SCREEN_AGENT_LOG_LEVEL:-INFO}
+      - ENV_SCREEN_AGENT_MODEL=${SCREEN_AGENT_MODEL:-gpt-4o-mini}
+      - ENV_SCREEN_AGENT_LOG_LEVEL=${SCREEN_AGENT_LOG_LEVEL:-INFO}
+    ports:
+      - "10005:10005"  # Xpra HTML5 streaming
+      - "10000:10000"  # Agent API (Socket.IO)
+    shm_size: "2gb"
+    restart: unless-stopped
+    volumes:
+      # Mount agent-api.py for live updates
+      - ./aios-xpra-app/agent-api.py:/opt/agent-api.py:rw
+      # Mount SuperAgent (NEW - Production-Ready Agent)
+      - ./superagent:/opt/lumina-search-flow-main/superagent:rw
+      - ./test_superagent.py:/opt/lumina-search-flow-main/test_superagent.py:rw
+      - ./test_workflows.py:/opt/lumina-search-flow-main/test_workflows.py:rw
+      # Mount Screen Agent source code (read-write so config can be patched)
+      - ./Nelieo Screen Agent AI OS/ScreenAgent-main/ScreenAgent-main:/opt/screen-agent:rw
+      # Persistent data for apps
+      - aios_data:/root/.config
+      - aios_chrome:/root/.config/google-chrome
+      - aios_slack:/root/.config/Slack
+      # GCP credentials (Vertex AI - NO RATE LIMITS!)
+      - ./gcp-credentials.json:/opt/gcp-credentials.json:ro
+    networks:
+      - aios_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10005"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  aios_data:
+    driver: local
+  aios_chrome:
+    driver: local
+  aios_slack:
+    driver: local
+
+networks:
+  aios_network:
+    driver: bridge

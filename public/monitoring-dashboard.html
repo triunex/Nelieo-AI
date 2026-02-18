@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI OS - 24/7 Monitoring Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .metric-subtext {
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+        .status-ok { color: #4ade80; }
+        .status-warning { color: #fbbf24; }
+        .status-error { color: #f87171; }
+        
+        .activity-log {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        .activity-log h2 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .log-time {
+            opacity: 0.7;
+            min-width: 80px;
+        }
+        .log-task {
+            flex: 1;
+            margin: 0 15px;
+        }
+        .log-status {
+            font-weight: bold;
+        }
+        
+        .savings-chart {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .savings-chart h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .savings-bar {
+            margin-bottom: 15px;
+        }
+        .savings-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .savings-bar-bg {
+            background: rgba(0, 0, 0, 0.2);
+            height: 30px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .savings-bar-fill {
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-weight: bold;
+            transition: width 1s;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI OS - Senior Employee Dashboard</h1>
+        <div class="subtitle">Real-time 24/7 Operation Monitoring</div>
+        
+        <div class="metrics">
+            <div class="metric-card">
+                <div class="metric-label">Tasks Completed</div>
+                <div class="metric-value status-ok" id="tasksCompleted">0</div>
+                <div class="metric-subtext">in the last 24 hours</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">System Uptime</div>
+                <div class="metric-value status-ok" id="uptime">0:00:00</div>
+                <div class="metric-subtext pulse">● Running</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Success Rate</div>
+                <div class="metric-value status-ok" id="successRate">0%</div>
+                <div class="metric-subtext" id="successCount">0 / 0 successful</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Cost Savings</div>
+                <div class="metric-value status-ok" id="costSavings">$0</div>
+                <div class="metric-subtext">vs. human employee</div>
+            </div>
+        </div>
+        
+        <div class="activity-log">
+            <h2>📋 Recent Activity</h2>
+            <div id="activityLog">
+                <div class="log-entry">
+                    <span class="log-time">--:--</span>
+                    <span class="log-task">Waiting for tasks...</span>
+                    <span class="log-status">⏳</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="savings-chart">
+            <h2>💰 Cost Savings Breakdown (Last 24h)</h2>
+            <div class="savings-bar">
+                <div class="savings-bar-label">
+                    <span>Customer Support</span>
+                    <span id="supportSavings">$0</span>
+                </div>
+                <div class="savings-bar-bg">
+                    <div class="savings-bar-fill" id="supportBar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="savings-bar">
+                <div class="savings-bar-label">
+                    <span>Accounting</span>
+                    <span id="accountingSavings">$0</span>
+                </div>
+                <div class="savings-bar-bg">
+                    <div class="savings-bar-fill" id="accountingBar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="savings-bar">
+                <div class="savings-bar-label">
+                    <span>Social Media</span>
+                    <span id="socialSavings">$0</span>
+                </div>
+                <div class="savings-bar-bg">
+                    <div class="savings-bar-fill" id="socialBar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="savings-bar">
+                <div class="savings-bar-label">
+                    <span>Recruiting</span>
+                    <span id="recruitingSavings">$0</span>
+                </div>
+                <div class="savings-bar-bg">
+                    <div class="savings-bar-fill" id="recruitingBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated data (replace with real API calls)
+        let startTime = Date.now();
+        let tasks = [];
+        let categories = {
+            support: { count: 0, savings: 0, rate: 8 }, // $8 per task
+            accounting: { count: 0, savings: 0, rate: 12 },
+            social: { count: 0, savings: 0, rate: 5 },
+            recruiting: { count: 0, savings: 0, rate: 15 }
+        };
+
+        function updateUptime() {
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            document.getElementById('uptime').textContent = 
+                `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function addTask(category, description, success = true) {
+            tasks.push({ category, description, success, time: new Date() });
+            
+            // Update category
+            if (success) {
+                categories[category].count++;
+                categories[category].savings += categories[category].rate;
+            }
+            
+            // Update metrics
+            const successful = tasks.filter(t => t.success).length;
+            const successRate = tasks.length > 0 ? Math.round((successful / tasks.length) * 100) : 0;
+            
+            document.getElementById('tasksCompleted').textContent = tasks.length;
+            document.getElementById('successRate').textContent = successRate + '%';
+            document.getElementById('successCount').textContent = `${successful} / ${tasks.length} successful`;
+            
+            const totalSavings = Object.values(categories).reduce((sum, cat) => sum + cat.savings, 0);
+            document.getElementById('costSavings').textContent = '$' + totalSavings;
+            
+            // Update savings bars
+            const maxSavings = Math.max(...Object.values(categories).map(c => c.savings), 1);
+            document.getElementById('supportSavings').textContent = '$' + categories.support.savings;
+            document.getElementById('supportBar').style.width = (categories.support.savings / maxSavings * 100) + '%';
+            
+            document.getElementById('accountingSavings').textContent = '$' + categories.accounting.savings;
+            document.getElementById('accountingBar').style.width = (categories.accounting.savings / maxSavings * 100) + '%';
+            
+            document.getElementById('socialSavings').textContent = '$' + categories.social.savings;
+            document.getElementById('socialBar').style.width = (categories.social.savings / maxSavings * 100) + '%';
+            
+            document.getElementById('recruitingSavings').textContent = '$' + categories.recruiting.savings;
+            document.getElementById('recruitingBar').style.width = (categories.recruiting.savings / maxSavings * 100) + '%';
+            
+            // Update activity log
+            const logContainer = document.getElementById('activityLog');
+            const timeStr = new Date().toLocaleTimeString();
+            const statusIcon = success ? '✅' : '❌';
+            const statusClass = success ? 'status-ok' : 'status-error';
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-time">${timeStr}</span>
+                <span class="log-task">${description}</span>
+                <span class="log-status ${statusClass}">${statusIcon}</span>
+            `;
+            
+            logContainer.insertBefore(entry, logContainer.firstChild);
+            
+            // Keep only last 10 entries
+            while (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        // Simulate tasks (for demo purposes)
+        // Replace this with real API polling: fetch('/api/tasks') etc.
+        function simulateTasks() {
+            const taskExamples = [
+                { cat: 'support', desc: 'Responded to customer inquiry about billing' },
+                { cat: 'support', desc: 'Categorized 3 support tickets by priority' },
+                { cat: 'accounting', desc: 'Created invoice #1247 for Acme Corp' },
+                { cat: 'accounting', desc: 'Updated Q4 revenue spreadsheet' },
+                { cat: 'social', desc: 'Posted update to LinkedIn' },
+                { cat: 'social', desc: 'Scheduled Instagram post for tomorrow' },
+                { cat: 'recruiting', desc: 'Reviewed 5 LinkedIn profiles for Software Engineer role' }
+            ];
+            
+            // Add a random task every 5-15 seconds
+            const randomTask = taskExamples[Math.floor(Math.random() * taskExamples.length)];
+            const success = Math.random() > 0.1; // 90% success rate
+            addTask(randomTask.cat, randomTask.desc, success);
+            
+            const nextDelay = 5000 + Math.random() * 10000;
+            setTimeout(simulateTasks, nextDelay);
+        }
+
+        // Update uptime every second
+        setInterval(updateUptime, 1000);
+        
+        // Start task simulation after 2 seconds
+        setTimeout(simulateTasks, 2000);
+
+        // TODO: Replace simulation with real API calls
+        // Example:
+        // setInterval(async () => {
+        //     const response = await fetch('http://localhost:8081/api/tasks/recent');
+        //     const data = await response.json();
+        //     data.tasks.forEach(task => addTask(task.category, task.description, task.success));
+        // }, 5000);
+    </script>
+</body>
+</html>

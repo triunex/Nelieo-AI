@@ -8,6 +8,8 @@ import React, {
 } from "react";
 import DeepResearchCanvas from "@/components/DeepResearchCanvas";
 import { useArsenal } from "../context/ArsenalContext";
+import StructuredAnswer from "@/components/StructuredAnswer";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -77,11 +79,10 @@ import { auth, db } from "@/lib/firebase";
 import ChatSidebar from "@/components/ChatSidebar"; // or from same file if inline
 import ChartRendererECharts from "@/components/ChartRendererECharts";
 import FocusDashboard from "@/components/FocusDashboard"; // or wherever it's located
-import TypingAnimation from "@/components/TypingAnimation";
+// TypingAnimation removed per UX request (show answers immediately)
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { autoChartPipeline } from "@/services/chartAutoService";
 import { toast } from "@/hooks/use-toast";
-import AILoader from "@/components/AILoader";
 import ChartLoader from "@/components/ChartLoader";
 
 import {
@@ -90,6 +91,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ShinyText from "@/components/ShinyText";
 
 const BrandedTooltip = ({
   content,
@@ -164,6 +166,104 @@ const Chat = () => {
           updatedAt: serverTimestamp(),
         });
       }
+      {
+        /* Chat Sources slide-over panel */
+      }
+      <AnimatePresence>
+        {chatSourcesOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[75] flex"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.55 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="absolute inset-0 bg-black"
+              onClick={() => setChatSourcesOpen(false)}
+            />
+
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              className="ml-auto w-full max-w-md bg-background/95 backdrop-blur-lg border-l border-white/6 shadow-2xl overflow-auto"
+            >
+              <div className="p-4 flex items-center justify-between border-b border-white/6">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center text-white font-semibold">
+                    S
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold">Sources</div>
+                    <div className="text-xs text-muted-foreground">
+                      {chatSources.length} items
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setChatSourcesOpen(false)}
+                    className="px-3 py-1 rounded hover:bg-white/5 text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-3 space-y-2">
+                {chatSources && chatSources.length > 0 ? (
+                  chatSources.map((s: any, i: number) => (
+                    <a
+                      key={i}
+                      href={s.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="block rounded-lg hover:bg-white/3 p-3 transition-colors border border-white/6"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 flex-shrink-0 rounded overflow-hidden bg-white/5 flex items-center justify-center">
+                          <img
+                            src={(() => {
+                              try {
+                                const u = new URL(s.url);
+                                return `https://www.google.com/s2/favicons?sz=64&domain=${u.hostname}`;
+                              } catch {
+                                return "/favicon.png";
+                              }
+                            })()}
+                            alt={s.title || s.url}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">
+                            {s.title || s.url}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1 line-clamp-3">
+                            {s.snippet || s.summary || ""}
+                          </div>
+                          <div className="text-xs text-primary mt-2 truncate">
+                            {s.url}
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-sm text-muted-foreground">
+                    No sources available
+                  </div>
+                )}
+              </div>
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>;
       setChatHistory((prev: any) =>
         prev.map((p: any) =>
           p.id === c.id ? { ...p, title: editingChatTitle } : p
@@ -188,6 +288,17 @@ const Chat = () => {
   };
   const [showTools, setShowTools] = useState(false);
   const [showArsnel, setShowArsnel] = useState(false);
+  // Attachments selected through + panel
+  const [attachments, setAttachments] = useState<
+    Array<{
+      id: string;
+      name: string;
+      size: number;
+      type: string;
+      dataUrl: string;
+    }>
+  >([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [activeArsenal, setActiveArsenal] = useState(false);
   const [activeSmartSearch, setActiveSmartSearch] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
@@ -208,6 +319,348 @@ const Chat = () => {
   const [isNavPanelPinned, setIsNavPanelPinned] = useState(false);
   const [isDiscoverPanelPinned, setIsDiscoverPanelPinned] = useState(false);
   const { config, instructions } = useArsenal();
+  // Per-message UI state: which tab is active for agentic answers
+  const [messageTabs, setMessageTabs] = useState<Record<number, string>>({});
+
+  // Sources slide-over for chat (shares same UI as Search page)
+  const [chatSourcesOpen, setChatSourcesOpen] = useState(false);
+  const [chatSources, setChatSources] = useState<Array<any>>([]);
+
+  // Helper: extract known verticals from an agentic JSON payload robustly
+  function extractAgenticPayload(msgContent: string) {
+    try {
+      const parsed = JSON.parse(msgContent || "{}");
+      // common places
+      const images =
+        parsed.images || parsed.media?.images || parsed.verticals?.images || [];
+      const videos =
+        parsed.videos || parsed.media?.videos || parsed.verticals?.videos || [];
+      const short_videos =
+        parsed.short_videos ||
+        parsed.shortVideos ||
+        parsed.verticals?.short_videos ||
+        [];
+      const news =
+        parsed.news || parsed.articles || parsed.verticals?.news || [];
+      const shopping =
+        parsed.shopping || parsed.products || parsed.verticals?.shopping || [];
+      const answer =
+        parsed.answer || parsed.formatted_answer || parsed.text || "";
+      const sources =
+        parsed.sources || parsed.meta?.sources || parsed.related_sources || [];
+      return { images, videos, short_videos, news, shopping, answer, sources };
+    } catch (e) {
+      return {
+        images: [],
+        videos: [],
+        short_videos: [],
+        news: [],
+        shopping: [],
+        answer: msgContent || "",
+        sources: [],
+      };
+    }
+  }
+
+  // --- Minimal inline renderers for agentic tabs (kept local to ChatPage) ---
+  const MiniImageGallery = ({ images }: { images: Array<string> }) => {
+    const [active, setActive] = useState<number | null>(null);
+    if (!images || images.length === 0)
+      return (
+        <div className="text-sm text-muted-foreground py-6 text-center">
+          No images available
+        </div>
+      );
+    return (
+      <div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className="rounded-lg overflow-hidden bg-gray-800"
+            >
+              <img
+                src={src}
+                alt={`img-${i}`}
+                className="w-full h-36 object-cover"
+              />
+            </button>
+          ))}
+        </div>
+        <AnimatePresence>
+          {active !== null && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[80] bg-black/80 flex items-center justify-center p-4"
+              onClick={() => setActive(null)}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="max-w-[90vw] max-h-[85vh]"
+              >
+                <img
+                  src={images[active]}
+                  alt={`img-${active}`}
+                  className="w-full h-auto max-h-[80vh] object-contain rounded"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
+  const MiniInAppVideoModal = ({
+    video,
+    onClose,
+  }: {
+    video: any | null;
+    onClose: () => void;
+  }) => {
+    if (!video) return null;
+    const getEmbedSrc = () => {
+      if (video.id && typeof video.id === "string")
+        return `https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`;
+      const url = video.url || video.link || "";
+      try {
+        const u = new URL(url);
+        if (
+          u.hostname.includes("youtube.com") ||
+          u.hostname.includes("youtu.be")
+        ) {
+          const params = new URLSearchParams(u.search);
+          const v = params.get("v");
+          if (v) return `https://www.youtube.com/embed/${v}?autoplay=1&rel=0`;
+          const paths = u.pathname.split("/").filter(Boolean);
+          const last = paths[paths.length - 1];
+          if (last)
+            return `https://www.youtube.com/embed/${last}?autoplay=1&rel=0`;
+        }
+        return url;
+      } catch (e) {
+        return video.url || video.link || "";
+      }
+    };
+    const src = getEmbedSrc();
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[90] bg-black/85 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-4xl bg-background/95 rounded-lg p-2"
+        >
+          {src && src.startsWith("http") ? (
+            <iframe
+              title={video.title || "video"}
+              src={src}
+              className="w-full aspect-video bg-black"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <div className="w-full aspect-video bg-black grid place-items-center text-sm text-muted-foreground">
+              Cannot play this video
+            </div>
+          )}
+          <div className="mt-3 flex justify-between items-center">
+            <div className="text-sm font-semibold text-foreground truncate">
+              {video.title || video.name || "Video"}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className="px-3 py-1 rounded bg-muted"
+                onClick={() => {
+                  navigator.clipboard?.writeText(video.url || video.link || "");
+                  toast({ title: "Copied", description: "Link copied" });
+                }}
+              >
+                Copy
+              </button>
+              <a
+                href={video.url || video.link}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1 rounded bg-muted"
+              >
+                Open original
+              </a>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const MiniVideoGrid = ({ items }: { items: Array<any> }) => {
+    const [active, setActive] = useState<any | null>(null);
+    if (!items || items.length === 0)
+      return (
+        <div className="text-sm text-muted-foreground py-6 text-center">
+          No videos available
+        </div>
+      );
+    return (
+      <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {items.map((r, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(r)}
+              className="group rounded-2xl overflow-hidden text-left border border-white/6 bg-white/3"
+            >
+              <div className="w-full aspect-video bg-gray-900">
+                {r.thumbnail ? (
+                  <img
+                    src={r.thumbnail}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full grid place-items-center text-sm text-muted-foreground">
+                    No thumb
+                  </div>
+                )}
+              </div>
+              <div className="p-2 text-left">
+                <div className="text-sm font-semibold line-clamp-2">
+                  {r.title || r.name || "Video"}
+                </div>
+                {(r.snippet || r.description) && (
+                  <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {r.snippet || r.description}
+                  </div>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+        <AnimatePresence>
+          {active && (
+            <MiniInAppVideoModal
+              video={active}
+              onClose={() => setActive(null)}
+            />
+          )}
+        </AnimatePresence>
+      </>
+    );
+  };
+
+  const MiniShortVideoGrid = ({ items }: { items: Array<any> }) => {
+    const [active, setActive] = useState<any | null>(null);
+    if (!items || items.length === 0)
+      return (
+        <div className="text-sm text-muted-foreground py-6 text-center">
+          No short videos available
+        </div>
+      );
+    return (
+      <>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {items.map((r, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(r)}
+              className="group rounded-2xl overflow-hidden text-left border border-white/6 bg-white/3"
+            >
+              <div className="w-full aspect-[9/16] bg-gray-900">
+                {r.thumbnail ? (
+                  <img
+                    src={r.thumbnail}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full grid place-items-center text-sm text-muted-foreground">
+                    No thumb
+                  </div>
+                )}
+              </div>
+              <div className="p-2 text-left">
+                <div className="text-sm font-semibold line-clamp-2">
+                  {r.title || r.name || "Short"}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <AnimatePresence>
+          {active && (
+            <MiniInAppVideoModal
+              video={active}
+              onClose={() => setActive(null)}
+            />
+          )}
+        </AnimatePresence>
+      </>
+    );
+  };
+
+  const MiniNewsPanel = ({ news }: { news: Array<any> }) => {
+    if (!news || news.length === 0)
+      return (
+        <div className="text-sm text-muted-foreground py-6 text-center">
+          No news available
+        </div>
+      );
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {news.map((n, i) => (
+          <a
+            key={i}
+            href={n.link || n.url}
+            target="_blank"
+            rel="noreferrer"
+            className="block rounded-lg border border-white/6 p-3 bg-white/3"
+          >
+            <div className="text-sm font-semibold line-clamp-2">{n.title}</div>
+            {n.source && (
+              <div className="text-xs text-muted-foreground mt-1">
+                {typeof n.source === "string" ? n.source : n.source?.name}
+              </div>
+            )}
+          </a>
+        ))}
+      </div>
+    );
+  };
+
+  const MiniShoppingResults = ({ items }: { items: Array<any> }) => {
+    if (!items || items.length === 0)
+      return (
+        <div className="text-sm text-muted-foreground py-6 text-center">
+          No shopping results
+        </div>
+      );
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {items.map((it, i) => (
+          <a
+            key={i}
+            href={it.url || "#"}
+            target="_blank"
+            rel="noreferrer"
+            className="block rounded-lg border border-white/6 p-2 bg-white/3"
+          >
+            <img
+              src={it.image}
+              alt={it.name}
+              className="w-full h-28 object-contain"
+            />
+            <div className="text-sm font-semibold mt-1">{it.name}</div>
+            <div className="text-xs text-muted-foreground">{it.price}</div>
+          </a>
+        ))}
+      </div>
+    );
+  };
 
   // Derived helper: true when the left nav/history panel is visible (hover/open/pinned)
   const isNavPanelVisible =
@@ -286,6 +739,30 @@ const Chat = () => {
         chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Handle file selection
+  const handleFilesSelected = (files: FileList | null) => {
+    if (!files) return;
+    const list = Array.from(files).slice(0, 6); // cap to 6
+    list.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAttachments((prev) => [
+          ...prev,
+          {
+            id: `${Date.now()}-${file.name}-${Math.random()
+              .toString(36)
+              .slice(2, 8)}`,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            dataUrl: String(e.target?.result || ""),
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   // Cleanup SSE on unmount
   useEffect(() => {
@@ -2162,7 +2639,13 @@ You are an expert data visualization AI. When given a prompt like:
               <div className="px-4 py-3 text-xs text-muted-foreground">
                 Recent chats
               </div>
-              <div className="max-h-72 overflow-auto">
+              <div
+                className="max-h-72 overflow-auto"
+                onWheel={(e: React.WheelEvent) => {
+                  // Prevent Lenis from intercepting wheel scroll inside chat history overlay
+                  e.stopPropagation();
+                }}
+              >
                 {(chatHistory || [])
                   .filter((h: any) =>
                     (h.title || "")
@@ -2539,43 +3022,20 @@ You are an expert data visualization AI. When given a prompt like:
         {/* Chat messages - Adjust top padding to account for header */}
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto px-6 pt-16 pb-4 space-y-6 custom-scrollbar md:pt-16 pt-[72px] chat-scroll-smooth"
+          className="flex-1 overflow-y-auto px-0 sm:px-6 pt-16 pb-4 space-y-6 custom-scrollbar md:pt-16 pt-[72px] chat-scroll-smooth"
           style={{
             transform: "translateZ(0)",
             willChange: "scroll-position, transform",
             WebkitOverflowScrolling: "touch",
           }}
+          onWheel={(e: React.WheelEvent) => {
+            // Stop propagation so the global smooth scroller (Lenis) doesn't
+            // hijack wheel events intended for the chat container. This keeps
+            // mouse-wheel scrolling native and responsive inside the chat.
+            e.stopPropagation();
+          }}
         >
-          {/* Animated loading stages */}
-          <AnimatePresence>
-            {isLoading && loadingStage && (
-              <motion.div
-                key={loadingStage}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center justify-center py-12"
-              >
-                {loadingStage === "preparing" && (
-                  <>
-                    <AILoader />
-                    <div className="text-sm text-muted-foreground">
-                      Preparing...
-                    </div>
-                  </>
-                )}
-                {loadingStage === "thinking" && (
-                  <>
-                    <AILoader />
-                    <div className="text-sm text-muted-foreground">
-                      Thinking...
-                    </div>
-                  </>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Loading indicator moved inline into AI message render (see below) */}
           {/* AnimatePresence for chat messages */}
           <AnimatePresence mode="popLayout" initial={false}>
             {messages.slice(-30).map((msg, index) => {
@@ -2586,6 +3046,30 @@ You are an expert data visualization AI. When given a prompt like:
 
               // Remove Markdown junk
               let rawBlock = msg.content.trim();
+
+              // Remove trailing Sources / Footnotes sections that model may append
+              // Pattern handles variants like:\nSources:\n<urls> ... and a subsequent Footnotes section.
+              // We only strip if they appear at the END to avoid removing legitimate mid-answer words.
+              const stripSections = (text: string) => {
+                try {
+                  // Normalize line endings
+                  let t = text.replace(/\r/g, "");
+                  // Regex to capture 'Sources' block and optional 'Footnotes' block at end
+                  const re = /\n+Sources?:[\s\S]*?(?:\n+Footnotes[\s\S]*?)?$/i;
+                  if (re.test(t)) {
+                    t = t.replace(re, "").trimEnd();
+                  }
+                  // Also remove isolated footnotes block if present alone
+                  const reFoot = /\n+Footnotes?[\s\S]*?$/i;
+                  if (reFoot.test(t)) {
+                    t = t.replace(reFoot, "").trimEnd();
+                  }
+                  return t;
+                } catch (e) {
+                  return text;
+                }
+              };
+              rawBlock = stripSections(rawBlock);
 
               rawBlock = rawBlock
                 .replace(/^```json/, "")
@@ -2604,6 +3088,24 @@ You are an expert data visualization AI. When given a prompt like:
               } catch (err) {
                 answerBlocks = null;
               }
+
+              // helper: determine if this message is agentic (SmartSearch) by
+              // checking for agentic metadata in JSON blocks or flags
+              const isAgenticMessage = (() => {
+                try {
+                  if (typeof msg.content === "string") {
+                    const raw = msg.content.trim();
+                    const parsed = JSON.parse(raw);
+                    // agentic responses often include mode/agentic/source fields
+                    if (parsed && (parsed.mode === "agentic" || parsed.agentic))
+                      return true;
+                    if (parsed?.meta?.agentic) return true;
+                  }
+                } catch (e) {}
+                // also use activeArsenal/activeSmartSearch flags when available
+                if (activeArsenal && activeSmartSearch) return true;
+                return false;
+              })();
 
               if (answerBlocks) {
                 const plainText = answerBlocksToText(answerBlocks);
@@ -2626,12 +3128,71 @@ You are an expert data visualization AI. When given a prompt like:
                     } transition-all duration-200 ease-out transform-gpu ${
                       msg.role === "user"
                         ? "bg-primary/10 backdrop-blur-md border border-primary/20 text-foreground rounded-lg px-4 py-2 shadow-sm max-w-[90%] sm:max-w-sm ml-auto sm:mx-auto text-left sm:translate-x-16 translate-x-3"
-                        : "text-foreground rounded-lg px-6 py-3 max-w-3xl mx-auto text-left"
+                        : // Mobile: make AI answers full-width (with comfortable padding) so they
+                          // cover the screen nicely on small devices. On sm+ keep the
+                          // existing centered max width and padding.
+                          "text-foreground rounded-none sm:rounded-lg px-4 sm:px-6 py-3 w-full max-w-full mx-0 sm:max-w-3xl sm:mx-auto text-left"
                     }`}
                     style={{ willChange: "transform, opacity" }}
                     aria-live={msg.role === "ai" ? "polite" : undefined}
                   >
                     <div className="ai-answer-font">
+                      {/* If this is an agentic/SmartSearch answer, show the small toggle tabs above the answer */}
+                      {isAgenticMessage && (
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <div className="flex-1">
+                            <Tabs
+                              value={messageTabs[index] || "Answer"}
+                              onValueChange={(v) =>
+                                setMessageTabs((prev) => ({
+                                  ...prev,
+                                  [index]: v,
+                                }))
+                              }
+                              className="w-full"
+                            >
+                              <TabsList className="p-1 rounded-md bg-muted/40 inline-flex">
+                                <TabsTrigger value="Answer">Answer</TabsTrigger>
+                                <TabsTrigger value="Images">Images</TabsTrigger>
+                                <TabsTrigger value="Videos">Videos</TabsTrigger>
+                                <TabsTrigger value="Short videos">
+                                  Short videos
+                                </TabsTrigger>
+                                <TabsTrigger value="News">News</TabsTrigger>
+                                <TabsTrigger value="Shopping">
+                                  Shopping
+                                </TabsTrigger>
+                                <TabsTrigger value="Sources">
+                                  Sources
+                                </TabsTrigger>
+                              </TabsList>
+                            </Tabs>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <button
+                              onClick={() => {
+                                // populate chatSources from message sources if available
+                                try {
+                                  const parsed = JSON.parse(
+                                    msg.content || "{}"
+                                  );
+                                  const s =
+                                    parsed.sources ||
+                                    parsed.meta?.sources ||
+                                    [];
+                                  setChatSources(Array.isArray(s) ? s : []);
+                                } catch (e) {
+                                  setChatSources([]);
+                                }
+                                setChatSourcesOpen(true);
+                              }}
+                              className="px-3 py-1 rounded-md border border-border bg-transparent text-sm"
+                            >
+                              Sources
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       {answerBlocks.map((block, idx) => {
                         switch (block.type) {
                           case "heading":
@@ -2681,8 +3242,8 @@ You are an expert data visualization AI. When given a prompt like:
                           case "table":
                             return (
                               <div key={idx} className="w-full mt-4 rounded-lg">
-                                {/* Mobile: allow horizontal scroll for wide tables; Desktop (sm+) remains unchanged */}
-                                <div className="w-full overflow-x-auto sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0">
+                                {/* Desktop/tablet: show regular table */}
+                                <div className="hidden sm:block w-full overflow-visible sm:overflow-visible sm:mx-0 sm:px-0">
                                   <table className="min-w-0 sm:min-w-full w-full border border-border rounded-lg overflow-hidden text-sm table-auto">
                                     <thead className="bg-muted text-left">
                                       <tr>
@@ -2715,12 +3276,110 @@ You are an expert data visualization AI. When given a prompt like:
                                     </tbody>
                                   </table>
                                 </div>
+
+                                {/* Mobile: stacked, card-like rows for readability */}
+                                <div className="block sm:hidden w-full px-2">
+                                  <div className="space-y-3">
+                                    {block.rows.map((row, rIdx) => (
+                                      <div
+                                        key={rIdx}
+                                        className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-800 rounded-lg p-3"
+                                      >
+                                        {row.map((cell, cIdx) => (
+                                          <div
+                                            key={cIdx}
+                                            className="flex gap-3 py-1 border-b last:border-b-0"
+                                          >
+                                            <div className="w-1/3 text-xs font-semibold text-muted-foreground break-words">
+                                              {block.headers[cIdx] ||
+                                                `Column ${cIdx + 1}`}
+                                            </div>
+                                            <div className="w-2/3 text-sm text-foreground break-words">
+                                              {cell}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                               </div>
                             );
                           default:
                             return null;
                         }
                       })}
+                      {/* If agentic and user toggled away from Answer tab, show the selected vertical */}
+                      {isAgenticMessage &&
+                        (messageTabs[index] || "Answer") !== "Answer" &&
+                        (() => {
+                          const payload = extractAgenticPayload(
+                            msg.content || ""
+                          );
+                          const activeTab = messageTabs[index] || "Answer";
+                          switch (activeTab) {
+                            case "Images":
+                              return (
+                                <MiniImageGallery images={payload.images} />
+                              );
+                            case "Videos":
+                              return <MiniVideoGrid items={payload.videos} />;
+                            case "Short videos":
+                              return (
+                                <MiniShortVideoGrid
+                                  items={payload.short_videos}
+                                />
+                              );
+                            case "News":
+                              return <MiniNewsPanel news={payload.news} />;
+                            case "Shopping":
+                              return (
+                                <MiniShoppingResults items={payload.shopping} />
+                              );
+                            case "Sources":
+                              return (
+                                <div className="mt-3">
+                                  {payload.sources &&
+                                  payload.sources.length > 0 ? (
+                                    payload.sources.map((s: any, i: number) => (
+                                      <a
+                                        key={i}
+                                        href={s.url || s}
+                                        className="block p-3 rounded-lg border border-white/6 mb-2"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        {s.title || s.url || s}
+                                      </a>
+                                    ))
+                                  ) : (
+                                    <div className="text-sm text-muted-foreground py-6 text-center">
+                                      No sources available
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            default:
+                              return null;
+                          }
+                        })()}
+                      {/* Inline shiny loader for the animating AI message */}
+                      {msg.role === "ai" &&
+                        animatingMessageIndex === index &&
+                        isLoading &&
+                        loadingStage && (
+                          <div className="mt-2 text-sm text-muted-foreground">
+                            <ShinyText
+                              text={
+                                loadingStage === "preparing"
+                                  ? "Preparing..."
+                                  : "Thinking..."
+                              }
+                              speed={3}
+                              className="text-sm"
+                            />
+                          </div>
+                        )}
                     </div>
                     {msg.role === "ai" && (
                       <div className="mt-2 flex gap-1 items-center">
@@ -3052,17 +3711,6 @@ You are an expert data visualization AI. When given a prompt like:
                       values={chartData.values}
                       data={chartData.data}
                     />
-                  ) : msg.role === "ai" &&
-                    messages.length > 0 &&
-                    messages[messages.length - 1] === msg &&
-                    animatingMessageIndex !== null &&
-                    !(msg as any).noAnimate ? (
-                    <TypingAnimation
-                      text={msg.content || ""}
-                      speed={6}
-                      typingDelay={150}
-                      onComplete={() => setAnimatingMessageIndex(null)}
-                    />
                   ) : (
                     <div className="ai-answer-font markdown-root prose dark:prose-invert text-foreground [&_*]:text-foreground">
                       {msg.role === "ai" ? (
@@ -3073,6 +3721,22 @@ You are an expert data visualization AI. When given a prompt like:
                               {msg.content || ""}
                             </ReactMarkdown>
                           </div>
+                          {/* Inline shiny loader for markdown AI messages */}
+                          {animatingMessageIndex === index &&
+                            isLoading &&
+                            loadingStage && (
+                              <div className="mt-2 text-sm text-muted-foreground">
+                                <ShinyText
+                                  text={
+                                    loadingStage === "preparing"
+                                      ? "Preparing..."
+                                      : "Thinking..."
+                                  }
+                                  speed={3}
+                                  className="text-sm"
+                                />
+                              </div>
+                            )}
                         </div>
                       ) : (
                         // User messages: render normally and allow wrapping to prevent horizontal scroll on mobile
@@ -3321,6 +3985,56 @@ You are an expert data visualization AI. When given a prompt like:
                   autoComplete="off"
                 />
 
+                {attachments.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-1 pl-1">
+                    {attachments.map((a) => (
+                      <div
+                        key={a.id}
+                        className="group flex items-center gap-2 px-2 py-1 rounded-full bg-muted/60 border border-border text-xs"
+                      >
+                        <span className="max-w-[120px] truncate" title={a.name}>
+                          {a.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {Math.round(a.size / 1024)}kb
+                        </span>
+                        <button
+                          onClick={() =>
+                            setAttachments((prev) =>
+                              prev.filter((p) => p.id !== a.id)
+                            )
+                          }
+                          className="rounded-full p-0.5 hover:bg-destructive/80 hover:text-destructive-foreground transition"
+                          title="Remove attachment"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            className="w-3 h-3"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M18 6L6 18M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    handleFilesSelected(e.target.files);
+                    e.target.value = ""; // allow re-select same file
+                  }}
+                />
+
                 {/* Bottom Row with Smart Search Button and Controls */}
                 <div className="flex justify-between items-center">
                   {/* Left Side - Attachment + Smart Search + Arsenal Button */}
@@ -3362,116 +4076,33 @@ You are an expert data visualization AI. When given a prompt like:
                         </motion.div>
                       </motion.button>
                     </BrandedTooltip>
-                    {/* Panel opened by +: render inline animated panel with Arsenal and Smart Search */}
                     {showArsnel && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                        transition={{ duration: 0.18 }}
-                        className="absolute bottom-14 left-0 z-50 w-46 p-3 rounded-2xl bg-card border border-border shadow-lg"
-                        style={{
-                          backdropFilter: "blur(12px)",
+                      <EnhancedPlusPanel
+                        onClose={() => setShowArsnel(false)}
+                        onPickFiles={() => fileInputRef.current?.click()}
+                        onActivateArsenal={() => {
+                          setActiveArsenal(true);
+                          toast({
+                            title: "Arsenal activated",
+                            description: "Arsenal mode is active.",
+                          });
                         }}
-                      >
-                        <div className="flex flex-col gap-2">
-                          <button
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition"
-                            onClick={() => {
-                              // Attach anything action placeholder
-                              setShowArsnel(false);
-                              toast({
-                                title: "Attach anything",
-                                description:
-                                  "Open file picker or attach resources.",
-                              });
-                            }}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              className="w-5 h-5 text-muted-foreground"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.2-9.2a3.5 3.5 0 014.95 4.95l-9.2 9.2a1.5 1.5 0 01-2.12-2.12l8.49-8.49" />
-                            </svg>
-                            <div className="text-left">
-                              <div className="text-sm font-semibold">
-                                Attach anything
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                Files, links, or references
-                              </div>
-                            </div>
-                          </button>
-
-                          <div className="h-px bg-white/20 my-1" />
-
-                          <button
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition"
-                            onClick={() => {
-                              // Activate Arsenal mode and close the tools panel
-                              setActiveArsenal(true);
-                              setShowArsnel(false);
-                              toast({
-                                title: "Arsenal activated",
-                                description:
-                                  "Arsenal mode is now active in the input bar.",
-                              });
-                            }}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              className="w-5 h-5 text-muted-foreground"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                              <path d="M2 17l10 5 10-5" />
-                              <path d="M2 12l10 5 10-5" />
-                            </svg>
-                            <div className="text-left">
-                              <div className="text-sm font-semibold">
-                                Arsenal
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                Advanced tools and Connectors
-                              </div>
-                            </div>
-                          </button>
-
-                          <button
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition"
-                            onClick={() => {
-                              // Open the Deep Research Canvas and close the tools panel
-                              setCanvasOpen(true);
-                              setShowArsnel(false);
-                              toast({
-                                title: "Canvas opened",
-                                description: "Opened Deep Research Canvas",
-                              });
-                            }}
-                          >
-                            <BookOpenCheck className="w-5 h-5 text-muted-foreground" />
-                            <div className="text-left">
-                              <div className="text-sm font-semibold">
-                                Canvas
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                Open Deep Research Canvas
-                              </div>
-                            </div>
-                          </button>
-                        </div>
-                      </motion.div>
+                        onOpenCanvas={() => {
+                          setCanvasOpen(true);
+                          toast({
+                            title: "Canvas opened",
+                            description: "Deep Research Canvas ready.",
+                          });
+                        }}
+                        setInput={setInput}
+                        triggerSend={() => {
+                          // optional immediate send after quick prompt selection
+                        }}
+                        addScreenCommand={(cmd) => {
+                          setInput(cmd);
+                        }}
+                        attachments={attachments}
+                      />
                     )}
 
                     {/* When Arsenal mode is active show a pill in the input bar */}
@@ -4018,6 +4649,211 @@ You are an expert data visualization AI. When given a prompt like:
           </motion.div>
         </motion.div>
       )}
+    </motion.div>
+  );
+};
+
+// Lightweight in-file component for the enhanced + panel
+const EnhancedPlusPanel = ({
+  onClose,
+  onPickFiles,
+  onActivateArsenal,
+  onOpenCanvas,
+  setInput,
+  triggerSend,
+  addScreenCommand,
+  attachments,
+}: {
+  onClose: () => void;
+  onPickFiles: () => void;
+  onActivateArsenal: () => void;
+  onOpenCanvas: () => void;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  triggerSend: () => void;
+  addScreenCommand: (cmd: string) => void;
+  attachments: Array<{ id: string; name: string; size: number; type: string }>;
+}) => {
+  const [filter, setFilter] = useState("");
+  const prompts = [
+    {
+      label: "Market Research",
+      text: "Do a market research on the AI wearables market and list top 10 emerging startups",
+    },
+    {
+      label: "SWOT",
+      text: "Perform a SWOT analysis for a remote AI research assistant SaaS",
+    },
+    {
+      label: "Summarize PDF",
+      text: "Summarize the attached PDFs into key bullet points and an executive summary",
+    },
+    {
+      label: "Competitors",
+      text: "List top 12 competitors for Notion and compare pricing & feature gaps",
+    },
+    {
+      label: "Screen: YouTube AI News",
+      text: "screen: open youtube and search for latest AI research breakthroughs 2025",
+    },
+  ];
+  const filtered = prompts.filter(
+    (p) =>
+      p.label.toLowerCase().includes(filter.toLowerCase()) ||
+      p.text.toLowerCase().includes(filter.toLowerCase())
+  );
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+      transition={{ duration: 0.18 }}
+      className="absolute bottom-14 left-0 z-50 w-72 p-4 rounded-2xl bg-card border border-border shadow-lg space-y-3"
+      style={{ backdropFilter: "blur(12px)" }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">
+          Magic Tools
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 rounded hover:bg-muted"
+          title="Close"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={() => {
+            onPickFiles();
+          }}
+          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition text-sm"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-5 h-5 text-primary"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.2-9.2a3.5 3.5 0 014.95 4.95l-9.2 9.2a1.5 1.5 0 01-2.12-2.12l8.49-8.49" />
+          </svg>
+          <div className="flex-1 text-left">
+            <div className="font-medium">Attach Files</div>
+            <div className="text-[11px] text-muted-foreground">
+              PDF, images, docs (up to 6)
+            </div>
+          </div>
+          {attachments.length > 0 && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-primary">
+              {attachments.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => {
+            onActivateArsenal();
+            onClose();
+          }}
+          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition text-sm"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-5 h-5 text-primary"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 12l10 5 10-5" />
+            <path d="M2 17l10 5 10-5" />
+          </svg>
+          <div className="flex-1 text-left">
+            <div className="font-medium">Arsenal Mode</div>
+            <div className="text-[11px] text-muted-foreground">
+              Enable advanced connectors
+            </div>
+          </div>
+        </button>
+        <button
+          onClick={() => {
+            onOpenCanvas();
+            onClose();
+          }}
+          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition text-sm"
+        >
+          <BookOpenCheck className="w-5 h-5 text-primary" />
+          <div className="flex-1 text-left">
+            <div className="font-medium">Deep Research Canvas</div>
+            <div className="text-[11px] text-muted-foreground">
+              Open interactive research
+            </div>
+          </div>
+        </button>
+        <button
+          onClick={() => {
+            addScreenCommand(
+              "screen: open gmail and compose a draft to investor about product traction"
+            );
+            onClose();
+          }}
+          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition text-sm"
+        >
+          <Monitor className="w-5 h-5 text-primary" />
+          <div className="flex-1 text-left">
+            <div className="font-medium">Screen Automation</div>
+            <div className="text-[11px] text-muted-foreground">
+              Prefill a screen command
+            </div>
+          </div>
+        </button>
+      </div>
+      <div className="h-px bg-white/10" />
+      <div className="space-y-2">
+        <input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Search quick prompts"
+          className="w-full px-2 py-1.5 text-xs rounded-lg bg-muted focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <div className="max-h-40 overflow-y-auto pr-1 flex flex-col gap-1.5">
+          {filtered.map((p) => (
+            <button
+              key={p.label}
+              onClick={() => {
+                setInput(p.text);
+                onClose();
+              }}
+              className="text-left text-xs p-2 rounded-lg bg-muted/40 hover:bg-muted transition"
+            >
+              <div className="font-medium text-[11px] mb-0.5">{p.label}</div>
+              <div className="text-[10px] text-muted-foreground leading-snug line-clamp-3">
+                {p.text}
+              </div>
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <div className="text-[11px] text-muted-foreground py-4 text-center">
+              No matches
+            </div>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 };

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nelieo-workspace-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: "nelieo-workspace-*-svc"
+spec:
+  tls:
+  - hosts:
+    - "*.workspace.nelieo.ai"
+    secretName: workspace-tls-cert
+  rules:
+  - host: "USER_ID_PLACEHOLDER.workspace.nelieo.ai"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nelieo-workspace-USER_ID_PLACEHOLDER-svc
+            port:
+              number: 10005

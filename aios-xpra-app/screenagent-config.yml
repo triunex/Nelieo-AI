@@ -1,0 +1,23 @@
+llm_api:
+  GPT4V:
+    model_name: "openai/gpt-4o-mini"
+    openai_api_key: "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"
+    target_url: "https://openrouter.ai/api/v1/chat/completions"
+    temperature: 0.5
+    top_p: 0.9
+    max_tokens: 400
+
+automaton:
+  language: "en"
+  operation_system: "linux"
+  prompt_tepmlate_dir: "/opt/screen-agent/client/prompt"
+  auto_transitions: true
+  auto_execute_actions: true
+  max_planning_attempts: 3
+
+remote_vnc_server:
+  host: "localhost"
+  port: 5900
+  password: "shorya123456"
+  use_remote_clipboard: false
+  task_list: "/opt/screen-agent/client/tasks.txt"

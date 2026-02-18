@@ -4,7 +4,8 @@ import App from "./App";
 import "./index.css"; // Ensure this file exists for styling
 import { applyTheme, getStoredTheme } from "@/utils/theme";
 // Lenis for smooth scrolling
-import Lenis from "lenis";
+// Use the official @studio-freight package path so bundlers can resolve it
+import Lenis from "@studio-freight/lenis";
 
 applyTheme(getStoredTheme());
 

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*;">
+    <title>Join our waitlist - Nelieo</title>
+    <link rel="stylesheet" href="join-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" href="nelieo-mark.png" type="image/png">
+</head>
+<body>
+    <!-- Background with macOS screenshots blur effect -->
+    <div class="background-container">
+        <div class="background-blur"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <div class="form-container">
+            <!-- Logo -->
+            <div class="logo-container">
+                <div class="logo-mark">
+                    <img src="nelieo-mark.png" alt="Nelieo mark" class="logo-img" />
+                    <span class="logo-text">Nelieo</span>
+                </div>
+            </div>
+
+            <!-- Heading -->
+            <div class="heading-container">
+                <p class="subtitle">Hey there 👋 We're almost ready to launch! Want to be part of our early crew? Join the waitlist and we'll keep you in the loop.</p>
+            </div>
+
+            <!-- Form -->
+            <form id="waitlistForm" class="waitlist-form">
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="email@address.com" 
+                            required
+                            autocomplete="email"
+                        >
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6L10 11L17 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <rect x="3" y="5" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <!-- Name Field -->
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            placeholder="John Doe" 
+                            required
+                            autocomplete="name"
+                        >
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M5 17C5 14.2386 7.23858 12 10 12C12.7614 12 15 14.2386 15 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="error-message" id="nameError"></span>
+                </div>
+
+                <!-- Company Field (Optional) -->
+                <div class="form-group">
+                    <label for="company">Company <span class="optional">(Optional)</span></label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="company" 
+                            name="company" 
+                            placeholder="Your company name"
+                            autocomplete="organization"
+                        >
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M7 8H13M7 12H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Use Case Field -->
+                <div class="form-group">
+                    <label for="useCase">What will you use Nelieo for?</label>
+                    <div class="input-wrapper">
+                        <select id="useCase" name="useCase" required>
+                            <option value="">Select a use case</option>
+                            <option value="customer-support">Customer Support Automation</option>
+                            <option value="sales">Sales & Lead Generation</option>
+                            <option value="data-entry">Data Entry & Processing</option>
+                            <option value="social-media">Social Media Management</option>
+                            <option value="research">Research & Analysis</option>
+                            <option value="email-management">Email Management</option>
+                            <option value="scheduling">Scheduling & Calendar</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <svg class="select-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="error-message" id="useCaseError"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button" id="submitBtn">
+                    <span class="btn-text">Sign Up</span>
+                    <span class="btn-loader"></span>
+                </button>
+
+                <!-- Privacy Policy -->
+                <p class="privacy-text">
+                    By registering, you agree to our <a href="privacy.html">Privacy Policy</a>
+                </p>
+            </form>
+
+            <!-- Success Message -->
+            <div class="success-container" id="successMessage">
+                <div class="success-icon">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="30" stroke="#10b981" stroke-width="3"/>
+                        <path d="M20 32L28 40L44 24" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2>You're on the list!</h2>
+                <p>We've sent a confirmation email to <strong id="confirmedEmail"></strong></p>
+                <p class="position-info">Your position: <strong>#<span id="positionNumber">-</span></strong></p>
+                <a href="/" class="back-button">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="join-app.js"></script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*;">
+    <title>Nelieo - First AI Native Operating System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" href="nelieo-mark.png" type="image/png">
+</head>
+<body>
+    <!-- Background Image -->
+    <div class="background-image"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="nelieo-mark.png" alt="Nelieo mark" class="logo-img" />
+                <span>Nelieo</span>
+                
+            </div>
+            <div class="nav-links">
+                <a href="insights.html" class="nav-button">Insights</a>
+            </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <!-- Announcement Badge -->
+            <div class="announcement-badge">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 1L9.5 6L14.5 6.5L10.5 10L11.5 15L8 12.5L4.5 15L5.5 10L1.5 6.5L6.5 6L8 1Z" fill="currentColor"/>
+                </svg>
+                <span class="badge-text">We are Building the Future</span>
+            </div>
+
+            <h1 class="hero-title">Self-Evolving Cloud Agents</h1>
+            <p class="hero-subtitle">Agentic AI Operating System that execute complex workflows end-to-end. No longer prompts, no oversight—just results.</p>
+            
+            <!-- Join Waitlist Button -->
+            <div class="cta-button-container">
+                <a href="/join.html" class="cta-button">
+                    <span class="shiny-text">Join our waitlist</span>
+                </a>
+            </div>
+            
+            <!-- Product Showcase -->
+            <div class="product-showcase">
+                <div class="showcase-card">
+                    <img src="wallpaper.png" alt="Nelieo AI OS" class="showcase-image" />
+                    <div class="showcase-overlay">
+                        <div class="live-indicator">
+                            <span>Live Demo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-item glass-mini">
+                    <div class="stat-number" id="waitlistCount">150</div>
+                    <div class="stat-label">On Waitlist</div>
+                </div>
+                <div class="stat-item glass-mini">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Tested tasks</div>
+                </div>
+                <div class="stat-item glass-mini">
+                    <div class="stat-number">98.7%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What Makes Us Unique Section -->
+    <section class="unique-section">
+        <div class="unique-container">
+            <h2 class="section-title">Why We Stand Out</h2>
+            
+            <div class="comparison-grid">
+                <!-- Nelieo Card -->
+                <div class="comparison-card nelieo-card">
+                    <div class="card-header">
+                        <div class="brand-logo">
+                            <img src="nelieo-mark.png" alt="Nelieo" class="brand-icon" />
+                            <span class="brand-name">Nelieo</span>
+                        </div>
+                        <p class="brand-tagline">Works like a Superhuman using <span class="highlight-icon">🖱️</span> mouse and <span class="highlight-icon">⌨️</span> keyboard</p>
+                    </div>
+                    
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <div class="check-icon">✓</div>
+                            <span>Controls real applications visually</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="check-icon">✓</div>
+                            <span>Support any app (Android, Linux, macOS, Windows)</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="check-icon">✓</div>
+                            <span>No coding or API integrations required</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="check-icon">✓</div>
+                            <span>Sees screen with its Breakthrough AI vision</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arrow Divider -->
+                <div class="comparison-arrow">
+                    <svg width="24" height="120" viewBox="0 0 24 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0V110M12 110L6 104M12 110L18 104" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                <!-- Competitor Card -->
+                <div class="comparison-card competitor-card">
+                    <div class="card-header">
+                        <div class="brand-name" style="margin-bottom: 12px;">Traditional AI Agents</div>
+                        <div class="competitor-logos">
+                            <img src="assets/claude-ai-logo-d862.png" alt="Claude" class="competitor-logo" />
+                            <img src="assets/1702059505open-ai-logo.png" alt="OpenAI" class="competitor-logo" />
+                            <span class="others-text">& others</span>
+                        </div>
+                        <p class="brand-tagline competitor-tag">Limited to MCPs and console commands</p>
+                    </div>
+                    
+                    <div class="features-list">
+                        <div class="feature-item disabled">
+                            <div class="cross-icon">✕</div>
+                            <span>Can't interact with real world applications</span>
+                        </div>
+                        <div class="feature-item disabled">
+                            <div class="cross-icon">✕</div>
+                            <span>Requires complex API integrations</span>
+                        </div>
+                        <div class="feature-item disabled">
+                            <div class="cross-icon">✕</div>
+                            <span>Limited platform support</span>
+                        </div>
+                        <div class="feature-item disabled">
+                            <div class="cross-icon">✕</div>
+                            <span>Needs programming expertise</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom CTA -->
+            <div class="unique-cta">
+                <p class="cta-text">Experience the future of AI automation</p>
+                <a href="/join.html" class="cta-button secondary">
+                    <span class="shiny-text">Get Early Access</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+    <script>
+        // Fetch live waitlist count from Firebase
+        async function updateWaitlistCount() {
+            try {
+                const response = await fetch('/api/waitlist/count');
+                const data = await response.json();
+                if (data.success && data.count !== undefined) {
+                    const countElement = document.getElementById('waitlistCount');
+                    if (countElement) {
+                        // Animate the count (add 150 baseline to Firebase count)
+                        const currentCount = parseInt(countElement.textContent) || 150;
+                        const newCount = data.count + 150;
+                        
+                        if (newCount !== currentCount) {
+                            // Simple count animation
+                            const duration = 1000;
+                            const steps = 30;
+                            const increment = (newCount - currentCount) / steps;
+                            let current = currentCount;
+                            let step = 0;
+                            
+                            const timer = setInterval(() => {
+                                step++;
+                                current += increment;
+                                countElement.textContent = Math.round(current);
+                                
+                                if (step >= steps) {
+                                    clearInterval(timer);
+                                    countElement.textContent = newCount;
+                                }
+                            }, duration / steps);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch waitlist count:', error);
+                // Keep the placeholder count on error
+            }
+        }
+        
+        // Update count on page load
+        updateWaitlistCount();
+        
+        // Optionally refresh count every 30 seconds
+        setInterval(updateWaitlistCount, 30000);
+
+        // Welcome sound effect on first visit
+        window.addEventListener('DOMContentLoaded', () => {
+            const hasVisited = sessionStorage.getItem('hasVisited');
+            if (!hasVisited) {
+                // Create AudioContext
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Play welcome sound (soft swoosh)
+                const playWelcomeSound = () => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                };
+                
+                // User interaction required for audio
+                const initAudio = () => {
+                    playWelcomeSound();
+                    sessionStorage.setItem('hasVisited', 'true');
+                    document.removeEventListener('click', initAudio);
+                    document.removeEventListener('touchstart', initAudio);
+                };
+                
+                document.addEventListener('click', initAudio, { once: true });
+                document.addEventListener('touchstart', initAudio, { once: true });
+            }
+        });
+
+        // Initialize Lenis Smooth Scroll - Ultra Smooth Configuration
+        const lenis = new Lenis({
+            duration: 1.8,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 0.8,
+            smoothTouch: false,
+            touchMultiplier: 1.5,
+            infinite: false,
+            normalizeWheel: true,
+            syncTouch: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
+        requestAnimationFrame(raf);
+
+        // Anchor link smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && href !== '') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        lenis.scrollTo(target, { offset: -80 });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
