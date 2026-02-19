@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     wmctrl \
     scrot \
     wget \
+    openbox \
     && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && apt-get install -y ./google-chrome-stable_current_amd64.deb \
     && rm google-chrome-stable_current_amd64.deb \
@@ -51,7 +52,8 @@ COPY weights/ /opt/omniparser/weights/
 
 # Copy application code
 COPY superagent /opt/lumina-search-flow-main/superagent
-COPY aios-xpra-app/agent-api.py /opt/agent-api.py
+COPY aios-xpra-app/*.py /opt/
+COPY aios-xpra-app/openbox-rc.xml /etc/xdg/openbox/rc.xml
 
 # Final environment tweaks
 ENV DISPLAY=:100
