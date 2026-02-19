@@ -60,4 +60,4 @@ ENV PYTHONPATH=/opt/lumina-search-flow-main
 EXPOSE 10000 10005
 
 # Start Xpra and Agent API
-CMD xpra start :100 --bind-tcp=0.0.0.0:10005 --html=on --start-child="python3 /opt/agent-api.py" && tail -f /var/log/agent-api.log
+CMD touch /var/log/agent-api.log && xpra start :100 --bind-tcp=0.0.0.0:10005 --html=on --start-child="python3 /opt/agent-api.py" --exit-with-children=no --daemon=yes && tail -f /var/log/agent-api.log
