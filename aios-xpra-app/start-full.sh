@@ -4,6 +4,11 @@ set -e
 echo "🧹 Cleaning up old X11 locks..."
 rm -f /tmp/.X100-lock /tmp/.X11-unix/X100 || true
 
+# Fix for Xlib/PyAutoGUI .Xauthority error
+echo "🔑 Creating dummy .Xauthority..."
+touch /root/.Xauthority
+export XAUTHORITY=/root/.Xauthority
+
 echo "🖥️ Starting Virtual Framebuffer (Xvfb) on :100..."
 Xvfb :100 -screen 0 1920x1080x24 &
 
