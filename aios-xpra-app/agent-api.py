@@ -304,7 +304,7 @@ try:
                 cache_enabled=True,
                 min_confidence=0.25,
                 max_elements=50,
-                generate_captions=False  # Skip Florence-2 for speed
+                generate_captions=True   # Enable Florence-2 for high-accuracy icon reasoning
             )
             
             fa_executor = ActionExecutor()
