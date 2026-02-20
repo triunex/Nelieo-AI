@@ -53,7 +53,10 @@ COPY weights/ /opt/omniparser/weights/
 # Copy application code
 COPY superagent /opt/lumina-search-flow-main/superagent
 COPY aios-xpra-app/*.py /opt/
+COPY aios-xpra-app/start-full.sh /opt/start-full.sh
 COPY aios-xpra-app/openbox-rc.xml /etc/xdg/openbox/rc.xml
+
+RUN chmod +x /opt/start-full.sh
 
 # Final environment tweaks
 ENV DISPLAY=:100
@@ -61,5 +64,5 @@ ENV PYTHONPATH=/opt/lumina-search-flow-main
 
 EXPOSE 10000 10005
 
-# Start Xpra and Agent API
-CMD touch /var/log/agent-api.log && xpra start :100 --bind-tcp=0.0.0.0:10005 --html=on --start-child="python3 /opt/agent-api.py" --exit-with-children=no --daemon=yes && tail -f /var/log/agent-api.log
+# Start the high-performance stack
+CMD ["/opt/start-full.sh"]
