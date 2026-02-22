@@ -1,7 +1,7 @@
 {
-    "name": "Google Chrome",
-    "cmd": "google-chrome-stable --no-sandbox --disable-gpu",
-    "url": "",
+    "name": "Chrome",
+    "cmd": "google-chrome",
+    "url": "https://www.google.com",
     "icon": "chrome",
     "category": "web",
     "description": "Web browser for internet automation"

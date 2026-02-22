@@ -1,0 +1,8 @@
+{
+    "name": "Google Sheets",
+    "cmd": "google-chrome",
+    "url": "https://docs.google.com/spreadsheets",
+    "icon": "sheets",
+    "category": "productivity",
+    "description": "Spreadsheet app - AI builds financial models and data analysis"
+}

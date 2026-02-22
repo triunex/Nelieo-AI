@@ -1,0 +1,8 @@
+{
+    "name": "Instagram",
+    "cmd": "google-chrome",
+    "url": "https://www.instagram.com",
+    "icon": "instagram",
+    "category": "communication",
+    "description": "Social media - AI manages posts, stories, and DMs"
+}

@@ -1,0 +1,8 @@
+{
+    "name": "Facebook",
+    "cmd": "google-chrome",
+    "url": "https://www.facebook.com",
+    "icon": "facebook",
+    "category": "communication",
+    "description": "Social media - AI manages posts, pages, and messaging"
+}

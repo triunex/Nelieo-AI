@@ -1,6 +1,6 @@
 {
     "name": "X (Twitter)",
-    "cmd": "google-chrome-stable --no-sandbox --disable-gpu --app=https://x.com",
+    "cmd": "google-chrome",
     "url": "https://x.com",
     "icon": "twitter",
     "category": "communication",
