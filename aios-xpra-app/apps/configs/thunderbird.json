@@ -1,0 +1,8 @@
+{
+    "name": "Thunderbird",
+    "cmd": "thunderbird",
+    "url": "",
+    "icon": "thunderbird",
+    "category": "communication",
+    "description": "Email client - AI manages your inbox, drafts replies"
+}

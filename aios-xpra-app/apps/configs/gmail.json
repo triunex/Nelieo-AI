@@ -1,0 +1,8 @@
+{
+    "name": "Gmail",
+    "cmd": "google-chrome-stable --no-sandbox --disable-gpu --app=https://mail.google.com",
+    "url": "https://mail.google.com",
+    "icon": "gmail",
+    "category": "communication",
+    "description": "Email app - AI reads, drafts, and sends emails autonomously"
+}

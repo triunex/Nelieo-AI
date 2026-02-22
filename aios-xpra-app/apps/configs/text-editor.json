@@ -1,0 +1,8 @@
+{
+    "name": "Text Editor",
+    "cmd": "mousepad",
+    "url": "",
+    "icon": "text-editor",
+    "category": "utilities",
+    "description": "Quick text editing"
+}

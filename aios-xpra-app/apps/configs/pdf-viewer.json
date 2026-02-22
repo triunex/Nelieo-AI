@@ -1,0 +1,8 @@
+{
+    "name": "PDF Viewer",
+    "cmd": "evince",
+    "url": "",
+    "icon": "evince",
+    "category": "productivity",
+    "description": "Document & PDF viewer"
+}

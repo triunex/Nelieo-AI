@@ -1,0 +1,8 @@
+{
+    "name": "VLC Media Player",
+    "cmd": "vlc",
+    "url": "",
+    "icon": "vlc",
+    "category": "media",
+    "description": "Media player - AI controls video and audio playback"
+}

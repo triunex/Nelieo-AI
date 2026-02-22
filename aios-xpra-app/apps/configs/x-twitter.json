@@ -1,0 +1,8 @@
+{
+    "name": "X (Twitter)",
+    "cmd": "google-chrome-stable --no-sandbox --disable-gpu --app=https://x.com",
+    "url": "https://x.com",
+    "icon": "twitter",
+    "category": "communication",
+    "description": "Social media - AI posts tweets, replies, and manages your timeline"
+}

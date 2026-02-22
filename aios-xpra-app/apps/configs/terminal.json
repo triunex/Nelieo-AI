@@ -1,0 +1,8 @@
+{
+    "name": "Terminal",
+    "cmd": "xterm",
+    "url": "",
+    "icon": "terminal",
+    "category": "development",
+    "description": "Command line terminal for DevOps"
+}

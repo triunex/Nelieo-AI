@@ -1,0 +1,8 @@
+{
+    "name": "Telegram Desktop",
+    "cmd": "telegram-desktop",
+    "url": "",
+    "icon": "telegram",
+    "category": "communication",
+    "description": "Messaging app - AI handles your conversations"
+}

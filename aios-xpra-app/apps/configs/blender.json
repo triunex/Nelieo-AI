@@ -1,0 +1,8 @@
+{
+    "name": "Blender",
+    "cmd": "blender",
+    "url": "",
+    "icon": "blender",
+    "category": "creative",
+    "description": "3D modeling and rendering - AI creates 3D worlds from text"
+}

@@ -1,0 +1,8 @@
+{
+    "name": "LibreOffice Impress",
+    "cmd": "libreoffice --impress",
+    "url": "",
+    "icon": "libreoffice-impress",
+    "category": "productivity",
+    "description": "Presentation app - AI creates pitch decks autonomously"
+}

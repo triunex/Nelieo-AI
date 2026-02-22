@@ -1,0 +1,8 @@
+{
+    "name": "LibreOffice Writer",
+    "cmd": "libreoffice --writer",
+    "url": "",
+    "icon": "libreoffice-writer",
+    "category": "productivity",
+    "description": "Document editor - AI writes professional business documents"
+}

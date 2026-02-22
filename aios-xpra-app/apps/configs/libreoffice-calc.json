@@ -1,0 +1,8 @@
+{
+    "name": "LibreOffice Calc",
+    "cmd": "libreoffice --calc",
+    "url": "",
+    "icon": "libreoffice-calc",
+    "category": "productivity",
+    "description": "Spreadsheet app - AI builds financial models and data analysis"
+}

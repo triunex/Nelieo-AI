@@ -1,0 +1,8 @@
+{
+    "name": "VS Code",
+    "cmd": "code --no-sandbox --disable-gpu",
+    "url": "",
+    "icon": "vscode",
+    "category": "development",
+    "description": "AI-powered code editor for autonomous development"
+}

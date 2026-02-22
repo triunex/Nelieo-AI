@@ -1,5 +1,8 @@
-# FastAgent FULL VERSION
+# ============================================================
+# Nelieo AI OS - Full Version (YC Demo Ready)
 # Optimized for GCP VM (T4/L4) with GPU support
+# Contains 12+ enterprise apps for universal AI automation
+# ============================================================
 
 FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
 
@@ -7,7 +10,9 @@ FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# ============================================================
+# Layer 1: Core System + Display Infrastructure
+# ============================================================
 RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
@@ -19,18 +24,72 @@ RUN apt-get update && apt-get install -y \
     wmctrl \
     scrot \
     wget \
+    curl \
     openbox \
     python3-tk \
     python3-xlib \
-    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt-get install -y ./google-chrome-stable_current_amd64.deb \
+    dbus-x11 \
+    at-spi2-core \
+    xdotool \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# Layer 2: The "YC Killer" App Stack (12 Enterprise Apps)
+# ============================================================
+
+# --- Productivity Suite (LibreOffice) ---
+RUN apt-get update && apt-get install -y \
+    libreoffice-calc \
+    libreoffice-writer \
+    libreoffice-impress \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Browser (Google Chrome) ---
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get update && apt-get install -y ./google-chrome-stable_current_amd64.deb \
     && rm google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix python symlink
+# --- Code Editor (VS Code) ---
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/packages.microsoft.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list \
+    && apt-get update && apt-get install -y code \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Communication & Media ---
+RUN apt-get update && apt-get install -y \
+    thunderbird \
+    vlc \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Design, Files & Utilities ---
+RUN apt-get update && apt-get install -y \
+    gimp \
+    inkscape \
+    nautilus \
+    thunar \
+    evince \
+    mousepad \
+    xterm \
+    gnome-calculator \
+    gnome-screenshot \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- 3D Modeling (Blender) ---
+RUN apt-get update && apt-get install -y \
+    blender \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Messaging (Telegram) ---
+RUN apt-get update && apt-get install -y \
+    telegram-desktop \
+    && rm -rf /var/lib/apt/lists/* || true
+
+# ============================================================
+# Layer 3: Python / ML Dependencies
+# ============================================================
 RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
-# Install ML & FastAgent dependencies
 RUN pip3 install --no-cache-dir \
     torch torchvision torchaudio \
     ultralytics \
@@ -44,12 +103,13 @@ RUN pip3 install --no-cache-dir \
     pyautogui \
     python-dotenv
 
-# Create app directories
+# ============================================================
+# Layer 4: OmniParser Weights + Application Code
+# ============================================================
 WORKDIR /opt/lumina-search-flow-main
-RUN mkdir -p /var/log /opt/omniparser/weights
+RUN mkdir -p /var/log /opt/omniparser/weights /opt/apps/configs
 
-# Copy weights (assuming they are in weights/ directory on host)
-# The setup-vm.sh will download these for you
+# Copy OmniParser V2 weights (YOLOv8 + Florence-2)
 COPY weights/ /opt/omniparser/weights/
 
 # Copy application code
@@ -57,14 +117,17 @@ COPY superagent /opt/lumina-search-flow-main/superagent
 COPY aios-xpra-app/*.py /opt/
 COPY aios-xpra-app/start-full.sh /opt/start-full.sh
 COPY aios-xpra-app/openbox-rc.xml /etc/xdg/openbox/rc.xml
+COPY aios-xpra-app/apps/configs/ /opt/apps/configs/
 
 RUN chmod +x /opt/start-full.sh
 
-# Final environment tweaks
+# ============================================================
+# Layer 5: Environment & Startup
+# ============================================================
 ENV DISPLAY=:100
 ENV PYTHONPATH=/opt/lumina-search-flow-main
 
 EXPOSE 10000 10005
 
-# Start the high-performance stack
+# Start the high-performance AI OS stack
 CMD ["/opt/start-full.sh"]

@@ -1,0 +1,8 @@
+{
+    "name": "Calculator",
+    "cmd": "gnome-calculator",
+    "url": "",
+    "icon": "calculator",
+    "category": "utilities",
+    "description": "Quick calculations"
+}

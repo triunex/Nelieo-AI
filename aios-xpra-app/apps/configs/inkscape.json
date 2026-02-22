@@ -1,0 +1,8 @@
+{
+    "name": "Inkscape",
+    "cmd": "inkscape",
+    "url": "",
+    "icon": "inkscape",
+    "category": "creative",
+    "description": "Vector graphics editor - AI creates logos and designs"
+}

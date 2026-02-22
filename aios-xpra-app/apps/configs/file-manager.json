@@ -1,0 +1,8 @@
+{
+    "name": "File Manager",
+    "cmd": "thunar",
+    "url": "",
+    "icon": "file-manager",
+    "category": "system",
+    "description": "File browser - AI organizes and manages your files"
+}

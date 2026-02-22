@@ -1,0 +1,8 @@
+{
+    "name": "GIMP",
+    "cmd": "gimp",
+    "url": "",
+    "icon": "gimp",
+    "category": "creative",
+    "description": "Professional image editor - AI retouches photos like a designer"
+}
