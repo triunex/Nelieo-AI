@@ -59,6 +59,7 @@ import { auth, db, storage as firebaseStorage } from "@/firebase";
 import AgentCursor from "@/components/AgentCursor";
 import AgentOverlay from "@/components/AgentOverlay";
 import { simpleAgentBridge } from "@/services/simple-agent-bridge";
+import { AIOS_STREAM_URL, AIOS_API_URL } from "@/config/aios-backend";
 import {
   getStorage,
   ref as storageRef,
@@ -395,7 +396,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "chrome",
               hideControls: true,
               isStreaming: true,
@@ -417,7 +418,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "gmail",
               hideControls: true,
               isStreaming: true,
@@ -439,7 +440,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "notion",
               hideControls: true,
               isStreaming: true,
@@ -461,7 +462,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "instagram",
               hideControls: true,
               isStreaming: true,
@@ -483,7 +484,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "facebook",
               hideControls: true,
               isStreaming: true,
@@ -505,7 +506,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "salesforce",
               hideControls: true,
               isStreaming: true,
@@ -527,7 +528,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "quickbooks",
               hideControls: true,
               isStreaming: true,
@@ -549,7 +550,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "slack",
               hideControls: true,
               isStreaming: true,
@@ -571,7 +572,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "linkedin",
               hideControls: true,
               isStreaming: true,
@@ -593,7 +594,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "sheets",
               hideControls: true,
               isStreaming: true,
@@ -615,7 +616,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "zoom",
               hideControls: true,
               isStreaming: true,
@@ -637,7 +638,7 @@ const AIOS: React.FC = () => {
             x: s.x,
             y: s.y,
             payload: {
-              url: "http://localhost:10005/",
+              url: AIOS_STREAM_URL,
               appName: "asana",
               hideControls: true,
               isStreaming: true,
@@ -749,7 +750,7 @@ const AIOS: React.FC = () => {
         description: "AI is analyzing the screen and executing your task...",
       });
 
-      const response = await fetch("/api/superagent/execute", {
+      const response = await fetch(`${AIOS_API_URL}/api/superagent/execute`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1086,8 +1087,8 @@ const AIOS: React.FC = () => {
                             setSelectedAiMode("chat");
                           }}
                           className={`w-full text-left px-2 py-2 rounded-md transition flex items-center justify-between ${selectedAiMode === "chat"
-                              ? "bg-white/6"
-                              : "hover:bg-white/6"
+                            ? "bg-white/6"
+                            : "hover:bg-white/6"
                             }`}
                         >
                           <div>
@@ -1106,8 +1107,8 @@ const AIOS: React.FC = () => {
                         <button
                           onClick={() => setSelectedAiMode("aurion")}
                           className={`w-full text-left px-2 py-2 rounded-md transition flex items-center justify-between ${selectedAiMode === "aurion"
-                              ? "bg-white/6"
-                              : "hover:bg-white/6"
+                            ? "bg-white/6"
+                            : "hover:bg-white/6"
                             }`}
                         >
                           <div>
@@ -1148,8 +1149,8 @@ const AIOS: React.FC = () => {
                                 >
                                   <span
                                     className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform ${selectedAiMode === "aurion"
-                                        ? "translate-x-6"
-                                        : "translate-x-0"
+                                      ? "translate-x-6"
+                                      : "translate-x-0"
                                       }`}
                                   />
                                 </span>
@@ -2264,10 +2265,10 @@ function RemoteChrome({
         )}
         <div
           className={`ml-1 w-2 h-2 rounded-full ${connectionStatus === "connected"
-              ? "bg-green-500"
-              : connectionStatus === "connecting"
-                ? "bg-yellow-500 animate-pulse"
-                : "bg-red-500"
+            ? "bg-green-500"
+            : connectionStatus === "connecting"
+              ? "bg-yellow-500 animate-pulse"
+              : "bg-red-500"
             }`}
           title={connectionStatus}
         />

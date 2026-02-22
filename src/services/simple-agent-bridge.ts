@@ -6,6 +6,7 @@
 
 import { AgentCursorPosition } from '@/components/AgentCursor';
 import { AgentStatus } from '@/components/AgentOverlay';
+import { AIOS_WS_URL, AIOS_API_URL } from '@/config/aios-backend';
 import io, { Socket } from 'socket.io-client';
 
 export interface AgentTaskRequest {
@@ -27,8 +28,8 @@ class SimpleAgentBridge {
 
   private connectWebSocket() {
     try {
-      // Connect to backend SocketIO
-      this.socket = io('http://localhost:10000', {
+      // Connect to backend SocketIO on the GCP VM
+      this.socket = io(AIOS_WS_URL, {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionDelay: 1000,
@@ -46,7 +47,7 @@ class SimpleAgentBridge {
       // Listen for agent updates from backend
       this.socket.on('agent_update', (data: any) => {
         console.log('📡 Agent update:', data);
-        
+
         // Update cursor position if available
         if (data.action && data.x !== undefined && data.y !== undefined) {
           this.cursorPosition = {
@@ -61,7 +62,7 @@ class SimpleAgentBridge {
 
         // CRITICAL: Only mark agent as active if it's actually running a complex task
         // Simple app opens or step_completed events should NOT trigger agent active state
-        const isReallyActive = (data.status === 'running' || data.status === 'thinking') 
+        const isReallyActive = (data.status === 'running' || data.status === 'thinking')
           && data.status !== 'step_completed'
           && data.status !== 'completed'
           && data.status !== 'cancelled';
@@ -81,13 +82,13 @@ class SimpleAgentBridge {
         // Fallback: if backend did not provide plan_steps but sent a 'plan' blob
         if ((!status.planSteps || status.planSteps.length === 0) && typeof data.plan === 'string') {
           // Attempt to split the plan into numbered steps
-            const extracted = data.plan
-              .split(/\n|\r|\d+\.|\- /)
-              .map((s: string) => s.trim())
-              .filter((s: string) => s.length > 3 && s.length < 140);
-            if (extracted.length > 0) {
-              status.planSteps = extracted.slice(0, 25); // cap for safety
-            }
+          const extracted = data.plan
+            .split(/\n|\r|\d+\.|\- /)
+            .map((s: string) => s.trim())
+            .filter((s: string) => s.length > 3 && s.length < 140);
+          if (extracted.length > 0) {
+            status.planSteps = extracted.slice(0, 25); // cap for safety
+          }
         }
 
         // Fallback 2: derive implicit steps from sequential actions
@@ -118,7 +119,7 @@ class SimpleAgentBridge {
         } else {
           this.agentStatus = { ...this.agentStatus, ...status };
         }
-        
+
         this.emit('status', this.agentStatus);
       });
 
@@ -174,8 +175,8 @@ class SimpleAgentBridge {
     this.emit('cursor', this.cursorPosition);
 
     try {
-      // Call backend API through Vite proxy
-      const response = await fetch('/api/agent/execute', {
+      // Call backend API on the GCP VM
+      const response = await fetch(`${AIOS_API_URL}/api/agent/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +197,7 @@ class SimpleAgentBridge {
       // Update status with result
       // Check both 'success' and 'status' fields for compatibility
       const isSuccess = result.success === true || result.status === 'completed';
-      
+
       if (isSuccess) {
         this.agentStatus = {
           ...this.agentStatus,
@@ -262,9 +263,9 @@ class SimpleAgentBridge {
       estimatedTimeRemaining: undefined,
       error: undefined,
     };
-    
+
     this.cursorPosition.visible = false;
-    
+
     this.emit('status', this.agentStatus);
     this.emit('cursor', this.cursorPosition);
   }
