@@ -101,7 +101,8 @@ RUN pip3 install --no-cache-dir \
     flask-socketio \
     requests \
     pyautogui \
-    python-dotenv
+    python-dotenv \
+    google-cloud-aiplatform
 
 # ============================================================
 # Layer 4: OmniParser Weights + Application Code
