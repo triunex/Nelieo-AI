@@ -273,7 +273,7 @@ STEP 4: DECIDE - What's the optimal action?
 
 STEP 5: ACT - Execute with precision
 - Click: Target the CENTER of elements
-- Type: Ensure input field is focused first
+- Type: Ensure input field is focused first. If typing a URL or Search query, ALWAYS include '\\n' at the end of the text to press Enter!
 - Navigate: Use address bar or links appropriately
 
 ═══════════════════════════════════════════════════════════════════════════════
