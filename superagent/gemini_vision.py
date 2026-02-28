@@ -584,11 +584,21 @@ RESPOND WITH COMPACT JSON ONLY:"""
                 if not primary and (obj.get('action') or obj.get('a')):
                     primary = obj
                     continue
+                
+                # If no action found yet, maybe it's a planning response (steps, thinking, etc)
+                if not primary and (obj.get('steps') or obj.get('thinking')):
+                    primary = obj
+                    continue
 
                 extras.append(obj)
 
+            if not primary and json_objects and isinstance(json_objects[0], dict):
+                # Just take the first valid object as fallback (for extraction/verification/planning)
+                primary = json_objects[0]
+                extras = json_objects[1:]
+
             if not primary:
-                raise ValueError("Missing 'action' or 'a' field in response")
+                raise ValueError("No valid JSON dictionary found in response")
 
             if extras:
                 primary['_extra'] = extras
