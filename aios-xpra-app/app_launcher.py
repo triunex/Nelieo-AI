@@ -88,6 +88,7 @@ class AppLauncher:
                     f"--password-store=basic "
                     f"--force-renderer-accessibility "
                     f"--enable-caret-browsing "
+                    f"--incognito "
                     f"--new-window {url}"
                 )
                 self.window_controller.open_application(full_cmd, wait_time=wait_time)
