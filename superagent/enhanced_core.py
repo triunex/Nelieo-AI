@@ -979,17 +979,16 @@ RESPOND WITH JSON - steps array MUST have at least 3 items:
                     reason_lower = action.reason.lower() if action.reason else ''
                     
                     # Map common click intents to shortcuts
+                    # NOTE: Be careful with broad keywords! 'tab' matches 'Y Combinator tab',
+                    # 'address bar tab', etc. Only use VERY specific multi-word phrases.
                     intent_map = {
                         'compose': 'compose',
                         'new message': 'compose',
                         'write': 'compose',
                         'reply': 'reply',
                         'send': 'send',
-                        'search': 'search',
                         'new task': 'new_task',
                         'create task': 'new_task',
-                        'address bar': 'address_bar',
-                        'new tab': 'new_tab'
                     }
                     
                     detected_intent = None
