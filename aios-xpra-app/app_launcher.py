@@ -48,13 +48,39 @@ class AppLauncher:
             logger.warning(f"Config directory not found: {self.config_dir}")
         return apps
     
+    def _is_app_running(self, app_name: str) -> bool:
+        """Check if an app window is already open via wmctrl."""
+        try:
+            result = subprocess.run(
+                ['wmctrl', '-l'],
+                capture_output=True, text=True,
+                env={**os.environ, 'DISPLAY': ':100'}
+            )
+            app_lower = app_name.lower()
+            for line in result.stdout.splitlines():
+                line_lower = line.lower()
+                if 'chrome' in line_lower and app_lower in ('chrome', 'google chrome', 'gmail', 'instagram', 'facebook', 'linkedin', 'x-twitter', 'youtube'):
+                    return True
+                if app_lower in line_lower:
+                    return True
+        except Exception as e:
+            logger.warning(f"wmctrl check failed: {e}")
+        return False
+
     def launch_app(self, app_name, wait_time=2):
-        """Launch a specific app"""
+        """Launch a specific app — focuses existing window if already running."""
         if app_name not in self.apps:
             logger.error(f"App '{app_name}' not found")
             print(f"❌ App '{app_name}' not found")
             return False
-        
+
+        # ✅ KEY FIX: If the app is already open, just focus it — don't spawn a new window!
+        if self._is_app_running(app_name):
+            logger.info(f"✅ {app_name} is already running — focusing existing window instead of launching new one")
+            if self.switch_app(app_name):
+                return True
+            logger.warning(f"Could not focus {app_name}, will relaunch anyway")
+
         app = self.apps[app_name]
         cmd = app['cmd']
         url = app.get('url', '')

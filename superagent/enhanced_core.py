@@ -472,10 +472,19 @@ Be concise. Focus on extractable data, not UI descriptions."""
         primary = apps[0]
         self.primary_app = primary
         if not self.app_launcher.switch_app(primary):
-            logger.info(f"Retrying focus for {primary} by relaunching")
-            self.app_launcher.launch_app(primary)
-            time.sleep(2)
-            self.app_launcher.switch_app(primary)
+            # ✅ SAFE: Try wmctrl focus rather than spawning a NEW window
+            logger.warning(f"switch_app failed for {primary} — trying wmctrl activate fallback")
+            try:
+                import subprocess
+                result = subprocess.run(
+                    ['wmctrl', '-a', primary],
+                    env={'DISPLAY': self.executor.display},
+                    stderr=subprocess.DEVNULL
+                )
+                logger.info(f"wmctrl -a {primary} returned code {result.returncode}")
+            except Exception as e:
+                logger.warning(f"wmctrl fallback also failed: {e}")
+            # Do NOT call launch_app() here — that spawns duplicate windows!
         self.executor.set_focus_hint(primary)
 
     def _is_app_window_open(self, app: str, windows: List[Dict[str, str]]) -> bool:
