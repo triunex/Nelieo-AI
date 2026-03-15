@@ -114,6 +114,10 @@ class AppLauncher:
                     f"--password-store=basic "
                     f"--force-renderer-accessibility "
                     f"--enable-caret-browsing "
+                    # 🛡️ ANTI-CAPTCHA: Disable automation detection flags
+                    f"--disable-blink-features=AutomationControlled "
+                    f"--disable-features=IsolateOrigins,site-per-process "
+                    f"--flag-switches-begin --disable-site-isolation-trials --flag-switches-end "
                     f"--incognito "
                     f"--new-window {url}"
                 )
