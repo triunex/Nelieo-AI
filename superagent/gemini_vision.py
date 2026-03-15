@@ -273,7 +273,7 @@ STEP 4: DECIDE - What's the optimal action?
 
 STEP 5: ACT - Execute with precision
 - Click: Target the CENTER of elements
-- Type: Ensure input field is focused first. If typing a URL or Search query, ALWAYS include '\\n' at the end of the text to press Enter!
+- Type: You MUST provide "x" and "y" coordinates with your type action to click and focus the input field first! If it's a search, include '\\n' to press Enter!
 - Navigate: Use address bar or links appropriately
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -353,7 +353,7 @@ o=observation, u=understanding, p=prediction, c=confidence, a=action
 t=type, r=reason, amt=amount
 
 ACTION TYPES:
-- click: Click (x,y) | type: Type text | hotkey: Keys ["ctrl","c"]
+- click: Click (x,y) | type: Type text at (x,y) | hotkey: Keys ["ctrl","c"]
 - scroll: amt pixels (negative=up, positive=down) | wait: Page load | done: Complete
 - open_app: Launch by name
 

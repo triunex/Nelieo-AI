@@ -179,7 +179,7 @@ class ActionExecutor:
                 return self._right_click(action.x, action.y)
             
             elif action.type == ActionType.TYPE:
-                return self._type_text(action.text)
+                return self._type_text(action.text, getattr(action, 'x', None), getattr(action, 'y', None))
             
             elif action.type == ActionType.HOTKEY:
                 # Pass x,y coordinates if available (for Ctrl+Click)
@@ -298,11 +298,17 @@ class ActionExecutor:
         pyautogui.rightClick(x, y)
         return True
     
-    def _type_text(self, text: str) -> bool:
-        """Type text with optimal speed"""
+    def _type_text(self, text: str, x: int = None, y: int = None) -> bool:
+        """Type text with optimal speed, and optional click-to-focus"""
         if not text:
             logger.warning("Empty text to type")
             return False
+            
+        if x is not None and y is not None:
+            if self._validate_coordinates(x, y):
+                logger.info(f"Clicking at ({x}, {y}) to focus before typing")
+                pyautogui.click(x, y)
+                time.sleep(0.2)
         
         # Type with minimal interval for speed
         pyautogui.write(text, interval=0.02)
